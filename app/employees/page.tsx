@@ -4,17 +4,29 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { useToast } from '@/lib/toast-context';
+import { getAvatarColor } from '@/lib/utils';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { Search, ArrowUpDown, Pencil, Trash2, Users, AlertTriangle, ChevronLeft, ChevronRight, X, Plus, LayoutGrid, List, Mail, Phone, Calendar, UserCheck, ShieldAlert } from 'lucide-react';
 
 interface EmployeeData { id: string; firstName: string; lastName: string; email: string; department: string; position: string; status: string; phone: string; role: string; joinDate: string; }
 
-const departments = ['all', 'Engineering', 'Design', 'Marketing', 'HR', 'Finance', 'Management'];
+const FALLBACK_DEPARTMENT_NAMES = ['Engineering', 'Design', 'Marketing', 'HR', 'Finance', 'Management'];
 
-function getAvatarColor(name: string) { 
-  let h = 0; 
-  for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h); 
-  return `hsl(${Math.abs(h % 360)}, 65%, 55%)`; 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function extractDepartmentNames(payload: unknown): string[] {
+  if (!isRecord(payload) || !Array.isArray(payload.data)) return [];
+
+  return payload.data.reduce<string[]>((names, item) => {
+    if (!isRecord(item) || typeof item.name !== 'string') return names;
+    const status = item.status;
+    if (status === 'inactive') return names;
+    const name = item.name.trim();
+    if (name && !names.includes(name)) names.push(name);
+    return names;
+  }, []);
 }
 
 export default function EmployeesPage() {
@@ -36,6 +48,7 @@ export default function EmployeesPage() {
   const [editingEmployee, setEditingEmployee] = useState<EmployeeData | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
+  const [departmentNames, setDepartmentNames] = useState<string[]>(FALLBACK_DEPARTMENT_NAMES);
   const [formData, setFormData] = useState({ 
     firstName: '', 
     lastName: '', 
@@ -48,6 +61,10 @@ export default function EmployeesPage() {
   });
 
   const isAdmin = user?.role === 'admin';
+  const departmentFilterOptions = ['all', ...departmentNames];
+  const employeeDepartmentOptions = formData.department && !departmentNames.includes(formData.department)
+    ? [formData.department, ...departmentNames]
+    : departmentNames;
 
   // Debounce search input
   useEffect(() => {
@@ -56,6 +73,24 @@ export default function EmployeesPage() {
     }, 300);
     return () => clearTimeout(handler);
   }, [searchInput]);
+
+  const fetchDepartmentOptions = useCallback(async () => {
+    if (!token) return;
+
+    try {
+      const res = await fetch('/api/departments?status=active', { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) {
+        setDepartmentNames(FALLBACK_DEPARTMENT_NAMES);
+        return;
+      }
+
+      const data: unknown = await res.json();
+      const names = extractDepartmentNames(data);
+      setDepartmentNames(names.length > 0 ? names : FALLBACK_DEPARTMENT_NAMES);
+    } catch {
+      setDepartmentNames(FALLBACK_DEPARTMENT_NAMES);
+    }
+  }, [token]);
 
   const fetchEmployees = useCallback(async (silent = false) => {
     if (!token) return;
@@ -86,7 +121,28 @@ export default function EmployeesPage() {
     }
   }, [token, searchDebounced, deptFilter, statusFilter, sortBy, sortOrder, page]);
 
+  useEffect(() => { fetchDepartmentOptions(); }, [fetchDepartmentOptions]);
   useEffect(() => { fetchEmployees(); }, [fetchEmployees]);
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    else { setSortBy(field); setSortOrder('asc'); }
+  };
+
+  const openCreateModal = useCallback(() => { 
+    setEditingEmployee(null); 
+    setFormData({ 
+      firstName: '', 
+      lastName: '', 
+      email: '', 
+      department: departmentNames[0] || FALLBACK_DEPARTMENT_NAMES[0], 
+      position: '', 
+      phone: '', 
+      role: 'employee', 
+      status: 'active' 
+    }); 
+    setShowModal(true); 
+  }, [departmentNames]);
 
   // Listen to global open-add-employee event from Header
   useEffect(() => {
@@ -95,27 +151,7 @@ export default function EmployeesPage() {
     };
     window.addEventListener('open-add-employee', handleOpenCreate);
     return () => window.removeEventListener('open-add-employee', handleOpenCreate);
-  }, []);
-
-  const handleSort = (field: string) => {
-    if (sortBy === field) setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
-    else { setSortBy(field); setSortOrder('asc'); }
-  };
-
-  const openCreateModal = () => { 
-    setEditingEmployee(null); 
-    setFormData({ 
-      firstName: '', 
-      lastName: '', 
-      email: '', 
-      department: 'Engineering', 
-      position: '', 
-      phone: '', 
-      role: 'employee', 
-      status: 'active' 
-    }); 
-    setShowModal(true); 
-  };
+  }, [openCreateModal]);
 
   const openEditModal = (emp: EmployeeData) => { 
     setEditingEmployee(emp); 
@@ -240,7 +276,7 @@ export default function EmployeesPage() {
             value={deptFilter} 
             onChange={val => { setDeptFilter(val); setPage(1); }} 
             testId="employee-dept-filter"
-            options={departments.map(d => ({ value: d, label: d === 'all' ? 'All Departments' : d }))}
+            options={departmentFilterOptions.map(d => ({ value: d, label: d === 'all' ? 'All Departments' : d }))}
             minWidth="160px"
           />
           
@@ -899,7 +935,7 @@ export default function EmployeesPage() {
                           testId="emp-department"
                           width="100%"
                           icon={null}
-                          options={departments.filter(d => d !== 'all').map(d => ({ value: d, label: d }))}
+                          options={employeeDepartmentOptions.map(d => ({ value: d, label: d }))}
                         />
                       </div>
                       

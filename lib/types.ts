@@ -19,6 +19,26 @@ export interface User {
 
 export type Employee = Omit<User, 'password'>;
 
+export type DepartmentStatus = 'active' | 'inactive';
+
+export interface Department {
+  id: string;
+  name: string;
+  description: string;
+  managerId?: string;
+  managerName?: string;
+  status: DepartmentStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DepartmentWithStats extends Department {
+  employeeCount: number;
+  activeEmployeeCount: number;
+  openTaskCount: number;
+  pendingLeaveCount: number;
+}
+
 export interface LeaveRequest {
   id: string;
   userId: string;

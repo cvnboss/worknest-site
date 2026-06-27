@@ -1,10 +1,13 @@
 import store from './store';
 import { hashPassword } from './auth';
+import { COLLECTIONS } from './constants';
+import type { Department, User } from './types';
 
 export function ensureSeeded() {
   if (store.isInitialized()) return;
 
   seedUsers();
+  seedDepartments();
   seedLeaveRequests();
   seedMeetingRooms();
   seedMeetings();
@@ -35,6 +38,74 @@ function seedUsers() {
   ];
 
   users.forEach(u => store.create('users', u));
+}
+
+function seedDepartments() {
+  const users = store.getAll(COLLECTIONS.USERS) as User[];
+  const now = new Date().toISOString();
+  const managerById = new Map(users.map((user) => [user.id, user]));
+
+  const departments: Department[] = [
+    {
+      id: 'd1',
+      name: 'Management',
+      description: 'Company leadership and administration',
+      managerId: 'u1',
+      status: 'active',
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: 'd2',
+      name: 'Engineering',
+      description: 'Product engineering, infrastructure, and quality',
+      managerId: 'u2',
+      status: 'active',
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: 'd3',
+      name: 'Design',
+      description: 'Product design, research, and creative work',
+      managerId: 'u12',
+      status: 'active',
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: 'd4',
+      name: 'Marketing',
+      description: 'Growth, content, and brand communications',
+      status: 'active',
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: 'd5',
+      name: 'HR',
+      description: 'People operations, hiring, and employee support',
+      status: 'active',
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: 'd6',
+      name: 'Finance',
+      description: 'Accounting, planning, and financial operations',
+      status: 'active',
+      createdAt: now,
+      updatedAt: now,
+    },
+  ];
+
+  departments.forEach((department) => {
+    const manager = department.managerId ? managerById.get(department.managerId) : undefined;
+    store.create(COLLECTIONS.DEPARTMENTS, {
+      ...department,
+      managerName: manager ? `${manager.firstName} ${manager.lastName}` : undefined,
+    });
+  });
 }
 
 function seedLeaveRequests() {
