@@ -791,6 +791,13 @@ h1, h2, h3, h4, h5, h6, .page-title, .drawer-title, .modal-title, .card-title {
   font-weight: 600;
   text-transform: uppercase;
   flex-shrink: 0;
+  overflow: hidden;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 .avatar-sm { width: 32px; height: 32px; font-size: 12px; }
 .avatar-md { width: 40px; height: 40px; font-size: 14px; }
@@ -1420,13 +1427,15 @@ h1, h2, h3, h4, h5, h6, .page-title, .drawer-title, .modal-title, .card-title {
   box-shadow: var(--shadow-sm);
 }
 
-.departments-toolbar .search-bar {
+.departments-toolbar .search-bar,
+.department-members-body .search-bar {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.departments-toolbar .search-bar-icon {
+.departments-toolbar .search-bar-icon,
+.department-members-body .search-bar-icon {
   position: absolute;
   left: var(--space-3);
   top: 50%;
@@ -1438,7 +1447,8 @@ h1, h2, h3, h4, h5, h6, .page-title, .drawer-title, .modal-title, .card-title {
   transform: translateY(-50%);
 }
 
-.departments-toolbar .search-bar-input {
+.departments-toolbar .search-bar-input,
+.department-members-body .search-bar-input {
   width: 100%;
   height: 40px;
   padding: 8px 36px 8px 38px;
@@ -1451,7 +1461,8 @@ h1, h2, h3, h4, h5, h6, .page-title, .drawer-title, .modal-title, .card-title {
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.departments-toolbar .search-bar-input:focus {
+.departments-toolbar .search-bar-input:focus,
+.department-members-body .search-bar-input:focus {
   outline: none;
   border-color: var(--primary-500);
   box-shadow: 0 0 0 3px var(--primary-100);
@@ -1605,6 +1616,21 @@ h1, h2, h3, h4, h5, h6, .page-title, .drawer-title, .modal-title, .card-title {
   font-size: var(--text-sm);
 }
 
+.department-member-count {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.department-member-count strong {
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+}
+
+.department-member-count .department-muted {
+  font-size: var(--text-xs);
+}
+
 .department-status-badge {
   text-transform: capitalize;
 }
@@ -1665,6 +1691,11 @@ h1, h2, h3, h4, h5, h6, .page-title, .drawer-title, .modal-title, .card-title {
 .department-card-grid strong {
   color: var(--text-primary);
   font-size: var(--text-sm);
+}
+
+.department-card-grid small {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
 }
 
 .department-card-actions {
@@ -1745,6 +1776,12 @@ h1, h2, h3, h4, h5, h6, .page-title, .drawer-title, .modal-title, .card-title {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+}
+
+.department-members-body .departments-search {
+  width: 100%;
+  min-width: 0;
+  flex: 0 0 auto;
 }
 
 .department-member-list {

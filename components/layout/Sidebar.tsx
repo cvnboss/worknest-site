@@ -273,7 +273,11 @@ export default function Sidebar() {
                 boxShadow: 'var(--shadow-xs)'
               }}
             >
-              {getInitials(user.firstName, user.lastName)}
+              {user.avatar ? (
+                <img src={user.avatar} alt={`${user.firstName} ${user.lastName}`} />
+              ) : (
+                getInitials(user.firstName, user.lastName)
+              )}
             </div>
             {!collapsed && (
               <>

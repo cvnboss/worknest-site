@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import store from '@/lib/store';
 import { hashPassword, signToken } from '@/lib/auth';
 import { ensureSeeded } from '@/lib/seed';
+import { createEmployeeAvatar } from '@/lib/utils';
 
 export async function POST(request: Request) {
   ensureSeeded();
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
       department: department || 'Unassigned',
       position: 'New Employee',
       phone: '',
-      avatar: '',
+      avatar: createEmployeeAvatar(firstName, lastName, email),
       joinDate: new Date().toISOString().split('T')[0],
       status: 'active',
     });

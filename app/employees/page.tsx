@@ -8,7 +8,7 @@ import { getAvatarColor } from '@/lib/utils';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { Search, ArrowUpDown, Pencil, Trash2, Users, AlertTriangle, ChevronLeft, ChevronRight, X, Plus, LayoutGrid, List, Mail, Phone, Calendar, UserCheck, ShieldAlert } from 'lucide-react';
 
-interface EmployeeData { id: string; firstName: string; lastName: string; email: string; department: string; position: string; status: string; phone: string; role: string; joinDate: string; }
+interface EmployeeData { id: string; firstName: string; lastName: string; email: string; department: string; position: string; status: string; phone: string; role: string; joinDate: string; avatar?: string; }
 
 const FALLBACK_DEPARTMENT_NAMES = ['Engineering', 'Design', 'Marketing', 'HR', 'Finance', 'Management'];
 
@@ -441,7 +441,11 @@ export default function EmployeesPage() {
                               fontSize: '14px'
                             }}
                           >
-                            {emp.firstName[0]}{emp.lastName[0]}
+                            {emp.avatar ? (
+                              <img src={emp.avatar} alt={`${emp.firstName} ${emp.lastName}`} />
+                            ) : (
+                              `${emp.firstName[0]}${emp.lastName[0]}`
+                            )}
                           </div>
                           <Link 
                             href={`/employees/${emp.id}`} 
@@ -571,6 +575,7 @@ export default function EmployeesPage() {
                     {/* Employee Core Profile */}
                     <div style={{ padding: '0 var(--space-4)', marginTop: '-24px', display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
                       <div 
+                        className="avatar"
                         style={{ 
                           width: '52px', 
                           height: '52px', 
@@ -586,7 +591,11 @@ export default function EmployeesPage() {
                           boxShadow: 'var(--shadow-xs)'
                         }}
                       >
-                        {emp.firstName[0]}{emp.lastName[0]}
+                        {emp.avatar ? (
+                          <img src={emp.avatar} alt={`${emp.firstName} ${emp.lastName}`} />
+                        ) : (
+                          `${emp.firstName[0]}${emp.lastName[0]}`
+                        )}
                       </div>
 
                       <div style={{ marginTop: '4px' }}>

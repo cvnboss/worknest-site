@@ -31,11 +31,31 @@ const statusBadgeClasses = (s: string) => {
   return map[s] || 'bg-slate-50 text-slate-700 border-slate-100';
 };
 
+const leaveStatusColors: Record<string, { text: string, bg: string, border: string }> = {
+  approved: { text: '#059669', bg: 'rgba(16, 185, 129, 0.08)', border: 'rgba(16, 185, 129, 0.18)' },
+  pending: { text: '#D97706', bg: 'rgba(245, 158, 11, 0.1)', border: 'rgba(245, 158, 11, 0.22)' },
+  rejected: { text: '#DC2626', bg: 'rgba(239, 68, 68, 0.08)', border: 'rgba(239, 68, 68, 0.18)' }
+};
+
 const leaveTypeColors: Record<string, { stroke: string, bg: string, text: string }> = {
   annual: { stroke: '#4F46E5', bg: 'rgba(79, 70, 229, 0.08)', text: '#4F46E5' },
   sick: { stroke: '#F97316', bg: 'rgba(249, 115, 22, 0.08)', text: '#F97316' },
   personal: { stroke: '#EC4899', bg: 'rgba(236, 72, 153, 0.08)', text: '#EC4899' },
   remote: { stroke: '#0EA5E9', bg: 'rgba(14, 165, 233, 0.08)', text: '#0EA5E9' }
+};
+
+const leaveTypeBadgeStyle = (type: string) => {
+  const color = leaveTypeColors[type] || { bg: 'rgba(241, 245, 249, 0.8)', text: '#64748B' };
+  return {
+    backgroundColor: color.bg,
+    border: `1px solid ${color.text}33`,
+    color: color.text
+  };
+};
+
+const leaveStatusTextStyle = (status: string) => {
+  const color = leaveStatusColors[status] || { text: '#64748B' };
+  return { color: color.text };
 };
 
 // CustomSelect is imported from components/ui/CustomSelect
@@ -48,6 +68,7 @@ export default function LeavePage() {
   const hasLoadedRef = useRef(false);
   const [activeTab, setActiveTab] = useState<'my' | 'team'>('my');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showApproveModal, setShowApproveModal] = useState<LeaveData | null>(null);
   const [form, setForm] = useState({ type: 'annual', startDate: '', endDate: '', reason: '' });
@@ -60,7 +81,7 @@ export default function LeavePage() {
     if (!token) return;
     const showLoader = !silent && !hasLoadedRef.current;
     if (showLoader) setLoading(true);
-    const params = new URLSearchParams({ view: activeTab, status: statusFilter });
+    const params = new URLSearchParams({ view: activeTab, status: statusFilter, type: typeFilter });
     try {
       const res = await fetch(`/api/leave?${params}`, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
@@ -73,7 +94,7 @@ export default function LeavePage() {
     } finally {
       if (showLoader) setLoading(false);
     }
-  }, [token, activeTab, statusFilter]);
+  }, [token, activeTab, statusFilter, typeFilter]);
 
   useEffect(() => { fetchLeaves(); }, [fetchLeaves]);
 
@@ -241,7 +262,8 @@ export default function LeavePage() {
             border: '1px solid var(--border-default)',
             margin: 0,
             height: '40px',
-            alignItems: 'center'
+            alignItems: 'center',
+            minWidth: isManagerOrAdmin ? '292px' : '146px'
           }}
         >
           <button 
@@ -262,7 +284,8 @@ export default function LeavePage() {
               transition: 'all 0.2s',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              width: '140px'
             }}
           >
             My Requests
@@ -286,7 +309,8 @@ export default function LeavePage() {
                 transition: 'all 0.2s',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                width: '140px'
               }}
             >
               Team Requests
@@ -295,7 +319,20 @@ export default function LeavePage() {
         </div>
 
         {/* Filters and Actions */}
-        <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          <CustomSelect 
+            value={typeFilter}
+            onChange={setTypeFilter}
+            testId="leave-type-filter"
+            options={[
+              { value: 'all', label: 'All Types' },
+              { value: 'annual', label: 'Annual' },
+              { value: 'sick', label: 'Sick' },
+              { value: 'personal', label: 'Personal' },
+              { value: 'remote', label: 'Remote' }
+            ]}
+            align="right"
+          />
           <CustomSelect 
             value={statusFilter}
             onChange={setStatusFilter}
@@ -323,6 +360,14 @@ export default function LeavePage() {
         }}
       >
         <table className="data-table" data-testid="leave-table" role="table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <colgroup>
+            <col style={{ width: '15%' }} />
+            <col style={{ width: '14%' }} />
+            <col style={{ width: '20%' }} />
+            <col style={{ width: '25%' }} />
+            <col style={{ width: '14%' }} />
+            <col style={{ width: '12%' }} />
+          </colgroup>
           <thead>
             <tr style={{ backgroundColor: 'rgba(248, 250, 252, 0.8)', borderBottom: '1px solid var(--border-default)' }}>
               <th style={{ padding: 'var(--space-4)', textAlign: 'left', fontWeight: 700, fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Employee</th>
@@ -354,8 +399,8 @@ export default function LeavePage() {
                   </td>
                   <td style={{ padding: 'var(--space-4)' }}>
                     <span 
-                      className="badge badge-neutral" 
-                      style={{ fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '2px 8px', backgroundColor: 'rgba(241, 245, 249, 0.8)', border: '1px solid var(--border-default)', color: 'var(--text-secondary)' }}
+                      className="badge" 
+                      style={{ fontSize: 'var(--text-xs)', lineHeight: 1.4, display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', ...leaveTypeBadgeStyle(l.type) }}
                     >
                       {typeIcons[l.type]} {l.type.charAt(0).toUpperCase() + l.type.slice(1)}
                     </span>
@@ -366,10 +411,10 @@ export default function LeavePage() {
                   <td style={{ padding: 'var(--space-4)', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', maxWidth: 220 }}>
                     <span className="truncate block" title={l.reason}>{l.reason}</span>
                   </td>
-                  <td style={{ padding: 'var(--space-4)' }}>
+                  <td style={{ padding: 'var(--space-4)', textAlign: 'left' }}>
                     <span 
                       className={`badge border ${statusBadgeClasses(l.status)}`}
-                      style={{ fontSize: '11px', fontWeight: 600, textTransform: 'capitalize', padding: '2px 8px', borderRadius: 'var(--radius-sm)' }}
+                      style={{ fontSize: 'var(--text-xs)', lineHeight: 1.4, fontWeight: 700, textTransform: 'capitalize', padding: 0, border: 'none', background: 'transparent', justifyContent: 'flex-start', ...leaveStatusTextStyle(l.status) }}
                     >
                       {l.status}
                     </span>

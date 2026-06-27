@@ -5,7 +5,6 @@ import { useAuth } from '@/lib/auth-context';
 import { useToast } from '@/lib/toast-context';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { Search, Calendar, Trash2, Plus, X, Filter, Tag, CheckCircle2, Circle, Clock, ChevronRight, AlertCircle } from 'lucide-react';
-import { getAvatarColor } from '@/lib/utils';
 
 interface TaskData {
   id: string;
@@ -62,7 +61,7 @@ export default function TasksPage() {
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [searchInput, setSearchInput] = useState('');
   const [searchDebounced, setSearchDebounced] = useState('');
-  const [employees, setEmployees] = useState<Array<{ id: string; firstName: string; lastName: string }>>([]);
+  const [employees, setEmployees] = useState<Array<{ id: string; firstName: string; lastName: string; avatar?: string }>>([]);
   const [form, setForm] = useState({ title: '', description: '', assignee: '', priority: 'medium', status: 'todo', dueDate: '', tags: '' });
   const hasProcessedUrlParam = useRef(false);
 
@@ -415,10 +414,14 @@ export default function TasksPage() {
                         {/* Assignee & Date */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '4px', borderTop: '1px dashed var(--border-default)' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            {(() => {
+                              const assignee = employees.find(emp => emp.id === task.assignee);
+                              const assigneeAvatar = assignee?.avatar;
+                              return (
                             <div 
                               className="avatar" 
                               style={{ 
-                                background: getAvatarColor(task.assigneeName), 
+                                background: 'var(--bg-hover)', 
                                 width: 22, 
                                 height: 22, 
                                 fontSize: '9px',
@@ -430,8 +433,14 @@ export default function TasksPage() {
                                 borderRadius: '50%'
                               }}
                             >
-                              {task.assigneeName.split(' ').map(n => n[0]).join('')}
+                              {assigneeAvatar ? (
+                                <img src={assigneeAvatar} alt={task.assigneeName} />
+                              ) : (
+                                task.assigneeName.split(' ').map(n => n[0]).join('')
+                              )}
                             </div>
+                              );
+                            })()}
                             <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 500 }}>
                               {task.assigneeName.split(' ')[0]}
                             </span>
