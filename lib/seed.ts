@@ -1,6 +1,7 @@
 import store from './store';
 import { hashPassword } from './auth';
 import { COLLECTIONS } from './constants';
+import { createEmployeeAvatar } from './utils';
 import type { Department, User } from './types';
 
 export function ensureSeeded() {
@@ -37,7 +38,10 @@ function seedUsers() {
     { id: 'u15', email: 'kevin@worknest.com', password: hashPassword('password123'), firstName: 'Kevin', lastName: 'Harris', role: 'employee', department: 'HR', position: 'Recruiter', phone: '+1-555-0115', avatar: '', joinDate: '2024-08-15', status: 'active' },
   ];
 
-  users.forEach(u => store.create('users', u));
+  users.forEach(u => store.create('users', {
+    ...u,
+    avatar: createEmployeeAvatar(u.firstName, u.lastName, u.id),
+  }));
 }
 
 function seedDepartments() {

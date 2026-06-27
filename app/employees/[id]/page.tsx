@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Mail, Phone, Building2, Briefcase, Calendar, CheckSquare, Clock, ClipboardList, Star } from 'lucide-react';
 
 interface ProfileData {
-  employee: { id: string; firstName: string; lastName: string; email: string; department: string; position: string; phone: string; role: string; joinDate: string; status: string };
+  employee: { id: string; firstName: string; lastName: string; email: string; department: string; position: string; phone: string; role: string; joinDate: string; status: string; avatar?: string };
   leaveHistory: Array<{ id: string; type: string; startDate: string; endDate: string; reason: string; status: string; createdAt: string }>;
   tasks: Array<{ id: string; title: string; priority: string; status: string; dueDate: string; tags: string[] }>;
   stats: { totalTasks: number; completedTasks: number; inProgressTasks: number; reviewTasks: number; leaveDaysUsed: number; leaveDaysPending: number };
@@ -150,7 +150,11 @@ export default function EmployeeProfilePage({ params }: { params: Promise<{ id: 
               boxShadow: 'var(--shadow-sm)'
             }}
           >
-            {emp.firstName[0]}{emp.lastName[0]}
+            {emp.avatar ? (
+              <img src={emp.avatar} alt={fullName} />
+            ) : (
+              `${emp.firstName[0]}${emp.lastName[0]}`
+            )}
           </div>
           <div style={{ flex: 1, minWidth: 220, display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flexWrap: 'wrap' }}>

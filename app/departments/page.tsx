@@ -30,6 +30,7 @@ interface EmployeeData {
   position: string;
   status: string;
   role: string;
+  avatar?: string;
 }
 
 interface DepartmentView {
@@ -117,7 +118,8 @@ function parseEmployees(payload: unknown): EmployeeData[] {
       department,
       position: asString(item.position),
       status: asString(item.status) || 'active',
-      role: asString(item.role) || 'employee'
+      role: asString(item.role) || 'employee',
+      avatar: asString(item.avatar)
     });
     return items;
   }, []);
@@ -571,7 +573,7 @@ export default function DepartmentsPage() {
               <strong>{stats.active}</strong>
             </div>
             <div className="department-stat-card">
-              <span className="department-stat-label">Employees Assigned</span>
+              <span className="department-stat-label">Active Employees</span>
               <strong>{stats.assignedEmployees}</strong>
             </div>
             <div className="department-stat-card">
@@ -613,7 +615,7 @@ export default function DepartmentsPage() {
                   <tr>
                     <th>Department</th>
                     <th>Manager</th>
-                    <th>Employees</th>
+                    <th>Active / Total</th>
                     <th>Open Tasks</th>
                     <th>Pending Leaves</th>
                     <th>Status</th>
@@ -650,8 +652,10 @@ export default function DepartmentsPage() {
                         )}
                       </td>
                       <td>
-                        <strong>{department.activeEmployeeCount}</strong>
-                        <span className="department-muted"> / {department.employeeCount}</span>
+                        <div className="department-member-count">
+                          <strong>{department.activeEmployeeCount} active</strong>
+                          <span className="department-muted">{department.employeeCount} total members</span>
+                        </div>
                       </td>
                       <td>{department.source === 'api' ? department.openTaskCount : '-'}</td>
                       <td>{department.source === 'api' ? department.pendingLeaveCount : '-'}</td>
@@ -725,8 +729,9 @@ export default function DepartmentsPage() {
                       <strong>{department.managerName || 'Unassigned'}</strong>
                     </div>
                     <div>
-                      <span>Employees</span>
-                      <strong>{department.activeEmployeeCount} / {department.employeeCount}</strong>
+                      <span>Active / Total</span>
+                      <strong>{department.activeEmployeeCount} active</strong>
+                      <small>{department.employeeCount} total members</small>
                     </div>
                     <div>
                       <span>Open Tasks</span>
@@ -930,7 +935,11 @@ export default function DepartmentsPage() {
                           }}
                         />
                         <span className="avatar avatar-sm" style={{ background: getAvatarColor(name) }}>
-                          {getInitials(name)}
+                          {employee.avatar ? (
+                            <img src={employee.avatar} alt={name} />
+                          ) : (
+                            getInitials(name)
+                          )}
                         </span>
                         <span className="department-member-info">
                           <strong>{name}</strong>

@@ -295,7 +295,11 @@ export default function SettingsPage() {
                     boxShadow: '0 0 12px rgba(79, 70, 229, 0.2)'
                   }}
                 >
-                  {user.firstName[0]}{user.lastName[0]}
+                  {user.avatar ? (
+                    <img src={user.avatar} alt={`${user.firstName} ${user.lastName}`} />
+                  ) : (
+                    `${user.firstName[0]}${user.lastName[0]}`
+                  )}
                 </div>
                 <div>
                   <h3 style={{ fontSize: 'var(--text-base)', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>

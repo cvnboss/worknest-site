@@ -367,8 +367,8 @@ export default function CalendarPage() {
                           <div 
                             key={e.id} 
                             style={{ 
-                              fontSize: '10px', 
-                              padding: '2px 6px', 
+                              fontSize: 'var(--text-xs)', 
+                              padding: '3px 6px', 
                               borderRadius: 'var(--radius-sm)', 
                               backgroundColor: eventStyles.backgroundColor, 
                               color: eventStyles.color,
@@ -377,7 +377,7 @@ export default function CalendarPage() {
                               overflow: 'hidden', 
                               textOverflow: 'ellipsis',
                               fontWeight: 600,
-                              lineHeight: '1.3'
+                              lineHeight: '1.35'
                             }}
                           >
                             {e.startTime && `${e.startTime} `}{e.title}
@@ -385,7 +385,7 @@ export default function CalendarPage() {
                         );
                       })}
                       {dayEvents.length > 3 && (
-                        <div style={{ fontSize: '9px', color: 'var(--text-muted)', textAlign: 'center', marginTop: 1, fontWeight: 700 }}>
+                        <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', textAlign: 'center', marginTop: 1, fontWeight: 700, lineHeight: 1.3 }}>
                           +{dayEvents.length - 3} more
                         </div>
                       )}
