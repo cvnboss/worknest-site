@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { Bell, Check, CheckSquare, CalendarDays, Megaphone, Calendar, PartyPopper } from 'lucide-react';
 import type { Notification } from '@/lib/types';
+import { timeAgo } from '@/lib/utils';
 
 interface NotificationPanelProps {
   isOpen: boolean;
@@ -23,15 +24,6 @@ const getIcon = (type: string) => {
     case 'announcement_new': return <Megaphone size={16} className="text-warning-600" />;
     default: return <Bell size={16} className="text-neutral-500" />;
   }
-};
-
-const timeAgo = (timestamp: string) => {
-  const diff = Date.now() - new Date(timestamp).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
 };
 
 export default function NotificationPanel({ isOpen, onClose, onUnreadCountChange }: NotificationPanelProps) {

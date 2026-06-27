@@ -19,6 +19,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const leave = store.getById('leaves', id);
     if (!leave) return NextResponse.json({ success: false, error: 'Leave request not found' }, { status: 404 });
 
+    if (payload.userId === leave.userId) {
+      return NextResponse.json({ success: false, error: 'You cannot approve/reject your own leave request' }, { status: 403 });
+    }
+
     if (leave.status !== 'pending') {
       return NextResponse.json({ success: false, error: 'Only pending requests can be approved/rejected' }, { status: 400 });
     }
@@ -44,7 +48,11 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       data: updated,
       message: `Leave request ${action === 'approve' ? 'approved' : 'rejected'}`
     });
-  } catch {
-    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  } catch (error) {
+    console.error('[leave/approve] error:', error);
+    if (error instanceof Error && (error.message.includes('JWS') || error.message.includes('JWT'))) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -171,20 +171,38 @@ export default function CalendarPage() {
   };
 
   return (
-    <div data-testid="calendar-page" className="animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)', gap: 'var(--space-5)' }}>
+    <div data-testid="calendar-page" className="animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 128px)', overflow: 'hidden' }}>
       {/* Header section */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-4)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
-          <h2 style={{ fontSize: '26px', fontWeight: 800, margin: 0, letterSpacing: '-0.02em', color: 'var(--text-primary)', fontFamily: 'var(--font-display)', minWidth: '220px' }}>
+      <div 
+        className="filter-bar animate-fadeIn"
+        style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          flexWrap: 'wrap', 
+          gap: 'var(--space-4)',
+          background: 'var(--bg-surface)',
+          padding: 'var(--space-4)',
+          borderRadius: 'var(--radius-xl)',
+          border: '1px solid var(--border-default)',
+          boxShadow: 'var(--shadow-sm)',
+          flexShrink: 0,
+          marginBottom: 'var(--space-4)'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', height: '40px' }}>
+          <h2 style={{ fontSize: '22px', fontWeight: 800, margin: 0, letterSpacing: '-0.02em', color: 'var(--text-primary)', fontFamily: 'var(--font-display)', minWidth: '200px', lineHeight: '40px', display: 'flex', alignItems: 'center' }}>
             {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
           </h2>
           <div 
             style={{ 
               display: 'flex', 
               backgroundColor: 'rgba(241, 245, 249, 0.8)', 
-              padding: '4px', 
+              padding: '3px', 
               borderRadius: 'var(--radius-lg)', 
-              border: '1px solid var(--border-default)' 
+              border: '1px solid var(--border-default)',
+              height: '40px',
+              alignItems: 'center'
             }}
           >
             <button 
@@ -221,10 +239,12 @@ export default function CalendarPage() {
           fontSize: 'var(--text-xs)', 
           fontWeight: 600, 
           color: 'var(--text-secondary)',
-          backgroundColor: 'var(--bg-surface)',
-          padding: '8px 16px',
+          backgroundColor: 'transparent',
+          padding: '0 8px',
           borderRadius: 'var(--radius-full)',
-          border: '1px solid var(--border-default)'
+          border: 'none',
+          height: '40px',
+          alignItems: 'center'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#6366F1' }} /> Meetings</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#3B82F6' }} /> Tasks</div>
@@ -285,7 +305,7 @@ export default function CalendarPage() {
               gridTemplateColumns: 'repeat(7, 1fr)', 
               gridAutoRows: '1fr', 
               flex: 1, 
-              overflowY: 'auto',
+              overflow: 'hidden',
               gap: '1px',
               backgroundColor: 'var(--border-default)',
               opacity: isFetching ? 0.75 : 1,

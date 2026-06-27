@@ -1,4 +1,6 @@
-import { useEffect, useState, useRef } from 'react';
+'use client';
+
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { ChevronRight, Filter, Check } from 'lucide-react';
 
 interface Option {
@@ -42,6 +44,17 @@ export default function CustomSelect({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Escape key handler to close dropdown
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen]);
+
   const selectedOption = options.find(o => o.value === value) || options[0];
 
   const outerWidth = width || 'auto';
@@ -56,22 +69,6 @@ export default function CustomSelect({
         minWidth: width ? 'none' : minWidth
       }}
     >
-      <style dangerouslySetInnerHTML={{__html: `
-        .custom-select-options::-webkit-scrollbar {
-          width: 5px;
-        }
-        .custom-select-options::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-select-options::-webkit-scrollbar-thumb {
-          background-color: var(--border-default);
-          border-radius: 10px;
-        }
-        .custom-select-options::-webkit-scrollbar-thumb:hover {
-          background-color: var(--text-muted);
-        }
-      `}} />
-
       {/* Hidden native select for E2E testing compatibility */}
       <select
         value={value}
@@ -97,6 +94,8 @@ export default function CustomSelect({
       {/* Styled dropdown trigger button */}
       <div
         onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
         style={{
           height: height,
           display: 'flex',
@@ -145,7 +144,8 @@ export default function CustomSelect({
       {/* Dropdown Options List */}
       {isOpen && (
         <div
-          className="custom-select-options"
+          className="custom-select-dropdown"
+          role="listbox"
           style={{
             position: 'absolute',
             top: 'calc(100% + 6px)',
@@ -174,6 +174,8 @@ export default function CustomSelect({
             return (
               <div
                 key={o.value}
+                role="option"
+                aria-selected={isSelected}
                 onClick={() => {
                   onChange(o.value);
                   setIsOpen(false);

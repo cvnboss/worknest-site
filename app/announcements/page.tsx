@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth-context';
 import { useToast } from '@/lib/toast-context';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { MessageSquare, Pin, Trash2, Megaphone, X, Plus, List, AlertCircle, Calendar, Shield, Send, ChevronRight, Clock, Layers } from 'lucide-react';
+import { getAvatarColor, timeAgo } from '@/lib/utils';
 
 interface AnnouncementData { id: string; title: string; content: string; author: string; authorName: string; category: string; isPinned: boolean; comments: CommentData[]; createdAt: string; }
 interface CommentData { id: string; content: string; authorName: string; createdAt: string; }
@@ -24,22 +25,7 @@ const categoryBadgeClasses: Record<string, string> = {
   policy: 'bg-purple-50 text-purple-600 border-purple-100 dark:bg-purple-950/30 dark:text-purple-400 dark:border-purple-900/30',
 };
 
-function getAvatarColor(name: string) { 
-  let h = 0; 
-  for (let i = 0; i < name.length; i++) {
-    h = name.charCodeAt(i) + ((h << 5) - h); 
-  }
-  return `hsl(${Math.abs(h % 360)}, 65%, 50%)`; 
-}
 
-function timeAgo(ts: string) { 
-  const d = Date.now() - new Date(ts).getTime(); 
-  const m = Math.floor(d / 60000); 
-  if (m < 60) return `${m}m ago`; 
-  const h = Math.floor(m / 60); 
-  if (h < 24) return `${h}h ago`; 
-  return `${Math.floor(h / 24)}d ago`; 
-}
 
 export default function AnnouncementsPage() {
   const { token, user } = useAuth();
@@ -49,7 +35,7 @@ export default function AnnouncementsPage() {
   const hasLoadedRef = useRef(false);
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [commentText, setCommentText] = useState('');
+  const [commentTexts, setCommentTexts] = useState<Record<string, string>>({});
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [form, setForm] = useState({ title: '', content: '', category: 'general', isPinned: false });
 
@@ -75,6 +61,15 @@ export default function AnnouncementsPage() {
 
   useEffect(() => { fetchAnnouncements(); }, [fetchAnnouncements]);
 
+  // Listen to global open-add-announcement event from Header
+  useEffect(() => {
+    const handleOpenCreate = () => {
+      setShowCreateModal(true);
+    };
+    window.addEventListener('open-add-announcement', handleOpenCreate);
+    return () => window.removeEventListener('open-add-announcement', handleOpenCreate);
+  }, []);
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     const res = await fetch('/api/announcements', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(form) });
@@ -89,11 +84,12 @@ export default function AnnouncementsPage() {
   };
 
   const handleComment = async (annId: string) => {
-    if (!commentText.trim()) return;
-    const res = await fetch(`/api/announcements/${annId}/comments`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ content: commentText }) });
+    const text = commentTexts[annId] || '';
+    if (!text.trim()) return;
+    const res = await fetch(`/api/announcements/${annId}/comments`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ content: text }) });
     const data = await res.json();
     if (data.success) {
-      setCommentText('');
+      setCommentTexts(prev => ({ ...prev, [annId]: '' }));
       fetchAnnouncements(true); // Silent reload
       addToast({ type: 'success', title: 'Comment added' });
     }
@@ -150,85 +146,55 @@ export default function AnnouncementsPage() {
 
   return (
     <div data-testid="announcements-page" className="animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
-      {/* Header */}
+      {/* Tabs and Actions Row */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-4)' }}>
-        <div>
-          <h2 className="page-title" style={{ margin: 0, fontSize: '28px', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
-            Announcements
-          </h2>
-          <p className="page-subtitle" style={{ margin: '4px 0 0 0', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
-            Stay updated with company news, events, and policies.
-          </p>
+        {/* Categories Tabs */}
+        <div 
+          className="segmented-tabs" 
+          data-testid="announcement-tabs"
+          style={{
+            display: 'flex',
+            gap: 'var(--space-2)',
+            padding: '4px',
+            backgroundColor: 'rgba(241, 245, 249, 0.7)',
+            borderRadius: 'var(--radius-xl)',
+            width: 'fit-content',
+            border: '1px solid var(--border-default)'
+          }}
+        >
+          {categories.map(c => (
+            <button 
+              key={c} 
+              className={`segmented-tab ${categoryFilter === c ? 'active' : ''}`} 
+              onClick={() => setCategoryFilter(c)} 
+              data-testid={`tab-${c}`}
+              style={{
+                padding: '8px 16px',
+                fontSize: 'var(--text-sm)',
+                fontWeight: 600,
+                borderRadius: 'var(--radius-lg)',
+                color: categoryFilter === c ? 'var(--primary-700)' : 'var(--text-secondary)',
+                backgroundColor: categoryFilter === c ? 'var(--bg-surface)' : 'transparent',
+                border: 'none',
+                boxShadow: categoryFilter === c ? 'var(--shadow-xs)' : 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                transition: 'all 0.2s'
+              }}
+            >
+              {c === 'all' ? (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Layers size={14} /> All</span>
+              ) : (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  {categoryIcons[c]} 
+                  {c.charAt(0).toUpperCase() + c.slice(1)}
+                </span>
+              )}
+            </button>
+          ))}
         </div>
-        {isManagerOrAdmin && (
-          <button 
-            className="btn btn-primary" 
-            onClick={() => setShowCreateModal(true)} 
-            data-testid="new-announcement-btn"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 'var(--space-2)',
-              padding: '10px 18px',
-              fontWeight: 600,
-              borderRadius: 'var(--radius-lg)',
-              boxShadow: 'var(--shadow-sm)',
-              transition: 'transform 0.15s'
-            }}
-            onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
-            onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-          >
-            <Plus size={18} /> New Announcement
-          </button>
-        )}
-      </div>
-
-      {/* Categories Tabs */}
-      <div 
-        className="segmented-tabs" 
-        data-testid="announcement-tabs"
-        style={{
-          display: 'flex',
-          gap: 'var(--space-2)',
-          padding: '4px',
-          backgroundColor: 'rgba(241, 245, 249, 0.7)',
-          borderRadius: 'var(--radius-xl)',
-          width: 'fit-content',
-          border: '1px solid var(--border-default)'
-        }}
-      >
-        {categories.map(c => (
-          <button 
-            key={c} 
-            className={`segmented-tab ${categoryFilter === c ? 'active' : ''}`} 
-            onClick={() => setCategoryFilter(c)} 
-            data-testid={`tab-${c}`}
-            style={{
-              padding: '8px 16px',
-              fontSize: 'var(--text-sm)',
-              fontWeight: 600,
-              borderRadius: 'var(--radius-lg)',
-              color: categoryFilter === c ? 'var(--primary-700)' : 'var(--text-secondary)',
-              backgroundColor: categoryFilter === c ? 'var(--bg-surface)' : 'transparent',
-              border: 'none',
-              boxShadow: categoryFilter === c ? 'var(--shadow-xs)' : 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.2s'
-            }}
-          >
-            {c === 'all' ? (
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Layers size={14} /> All</span>
-            ) : (
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                {categoryIcons[c]} 
-                {c.charAt(0).toUpperCase() + c.slice(1)}
-              </span>
-            )}
-          </button>
-        ))}
       </div>
 
       {/* Announcement Feed */}
@@ -413,8 +379,8 @@ export default function AnnouncementsPage() {
                       <input 
                         className="form-input" 
                         placeholder="Write a comment..." 
-                        value={commentText} 
-                        onChange={e => setCommentText(e.target.value)} 
+                        value={commentTexts[ann.id] || ''} 
+                        onChange={e => setCommentTexts(prev => ({ ...prev, [ann.id]: e.target.value }))} 
                         onKeyDown={e => e.key === 'Enter' && handleComment(ann.id)} 
                         data-testid={`comment-input-${ann.id}`} 
                         style={{ flex: 1, height: '36px', fontSize: '13px', padding: '0 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-default)' }}

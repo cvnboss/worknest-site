@@ -1,13 +1,30 @@
 import { NextResponse } from 'next/server';
 import store from '@/lib/store';
 import { ensureSeeded } from '@/lib/seed';
+import { extractToken, verifyToken } from '@/lib/auth';
 
-export async function POST() {
-  store.reset();
-  ensureSeeded();
+export async function POST(request: Request) {
+  try {
+    const token = extractToken(request);
+    if (!token) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    const payload = await verifyToken(token);
 
-  return NextResponse.json({
-    success: true,
-    message: 'All data has been reset to initial seed state',
-  });
+    if (payload.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'Only admins can reset seed data' }, { status: 403 });
+    }
+
+    store.reset();
+    ensureSeeded();
+
+    return NextResponse.json({
+      success: true,
+      message: 'All data has been reset to initial seed state',
+    });
+  } catch (error) {
+    console.error('[seed] error:', error);
+    if (error instanceof Error && (error.message.includes('JWS') || error.message.includes('JWT'))) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+  }
 }

@@ -88,6 +88,15 @@ export default function EmployeesPage() {
 
   useEffect(() => { fetchEmployees(); }, [fetchEmployees]);
 
+  // Listen to global open-add-employee event from Header
+  useEffect(() => {
+    const handleOpenCreate = () => {
+      openCreateModal();
+    };
+    window.addEventListener('open-add-employee', handleOpenCreate);
+    return () => window.removeEventListener('open-add-employee', handleOpenCreate);
+  }, []);
+
   const handleSort = (field: string) => {
     if (sortBy === field) setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
     else { setSortBy(field); setSortOrder('asc'); }
@@ -163,29 +172,90 @@ export default function EmployeesPage() {
   };
 
   return (
-    <div data-testid="employees-page" className="animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
-      {/* Page Header */}
+    <div 
+      data-testid="employees-page" 
+      className="animate-fadeIn" 
+      style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        height: 'calc(100vh - 128px)', 
+        overflow: 'hidden' 
+      }}
+    >
+      {/* Filter and Search Bar */}
       <div 
-        style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          flexWrap: 'wrap', 
-          gap: 'var(--space-4)',
-          borderBottom: '1px solid var(--border-default)',
-          paddingBottom: 'var(--space-4)'
+        className="filter-bar animate-fadeIn" 
+        data-testid="employee-filters"
+        style={{
+          display: 'flex',
+          gap: 'var(--space-3)',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          background: 'var(--bg-surface)',
+          padding: 'var(--space-4)',
+          borderRadius: 'var(--radius-xl)',
+          border: '1px solid var(--border-default)',
+          boxShadow: 'var(--shadow-sm)',
+          flexShrink: 0,
+          marginBottom: 'var(--space-4)'
         }}
       >
-        <div>
-          <h2 className="page-title" style={{ margin: 0, fontSize: '28px', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
-            Employee Directory
-          </h2>
-          <p className="page-subtitle" style={{ margin: '4px 0 0 0', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
-            {total} employee{total !== 1 ? 's' : ''} active in the workspace
-          </p>
+        <div className="search-bar" style={{ flex: 1, minWidth: '200px', margin: 0 }}>
+          <span className="search-bar-icon"><Search size={18} /></span>
+          <input 
+            className="search-bar-input" 
+            placeholder="Search employees..." 
+            value={searchInput} 
+            onChange={e => { setSearchInput(e.target.value); setPage(1); }} 
+            data-testid="employee-search"
+            style={{ height: '40px', paddingLeft: '38px', fontSize: 'var(--text-sm)' }}
+          />
+          {searchInput && (
+            <button 
+              className="search-bar-clear" 
+              onClick={() => setSearchInput('')}
+              style={{
+                position: 'absolute',
+                right: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                border: 'none',
+                background: 'transparent',
+                color: 'var(--text-muted)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '2px'
+              }}
+            >
+              <X size={15} />
+            </button>
+          )}
         </div>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+        {/* Filters and Actions */}
+        <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap', alignItems: 'center' }}>
+          <CustomSelect 
+            value={deptFilter} 
+            onChange={val => { setDeptFilter(val); setPage(1); }} 
+            testId="employee-dept-filter"
+            options={departments.map(d => ({ value: d, label: d === 'all' ? 'All Departments' : d }))}
+            minWidth="160px"
+          />
+          
+          <CustomSelect 
+            value={statusFilter} 
+            onChange={val => { setStatusFilter(val); setPage(1); }} 
+            testId="employee-status-filter"
+            options={[
+              { value: 'all', label: 'All Status' },
+              { value: 'active', label: 'Active' },
+              { value: 'inactive', label: 'Inactive' }
+            ]}
+            minWidth="140px"
+          />
+
           {/* Grid/Table Toggle */}
           <div 
             style={{ 
@@ -194,7 +264,9 @@ export default function EmployeesPage() {
               padding: '3px', 
               backgroundColor: 'rgba(241, 245, 249, 0.7)', 
               borderRadius: 'var(--radius-lg)',
-              border: '1px solid var(--border-default)'
+              border: '1px solid var(--border-default)',
+              height: '40px',
+              alignItems: 'center'
             }}
           >
             <button
@@ -232,144 +304,54 @@ export default function EmployeesPage() {
               <LayoutGrid size={16} />
             </button>
           </div>
-
-          {isAdmin && (
-            <button 
-              className="btn btn-primary" 
-              onClick={openCreateModal} 
-              data-testid="add-employee-btn"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 'var(--space-2)',
-                padding: '10px 18px',
-                fontWeight: 600,
-                borderRadius: 'var(--radius-lg)',
-                boxShadow: 'var(--shadow-sm)'
-              }}
-            >
-              <Plus size={18} /> Add Employee
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Filter and Search Bar */}
-      <div 
-        className="filter-bar animate-fadeIn" 
-        data-testid="employee-filters"
-        style={{
-          display: 'flex',
-          gap: 'var(--space-3)',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          background: 'var(--bg-surface)',
-          padding: 'var(--space-4)',
-          borderRadius: 'var(--radius-xl)',
-          border: '1px solid var(--border-default)',
-          boxShadow: 'var(--shadow-xs)'
-        }}
-      >
-        <div className="search-bar" style={{ flex: 1, minWidth: '240px', margin: 0, position: 'relative' }}>
-          <span className="search-bar-icon" style={{ display: 'flex', pointerEvents: 'none' }}><Search size={18} /></span>
-          <input 
-            className="search-bar-input" 
-            placeholder="Search employees..." 
-            value={searchInput} 
-            onChange={e => { setSearchInput(e.target.value); setPage(1); }} 
-            data-testid="employee-search"
-            style={{ height: '40px', paddingLeft: '38px', fontSize: 'var(--text-sm)' }}
-          />
-          {searchInput && (
-            <button 
-              className="search-bar-clear" 
-              onClick={() => setSearchInput('')}
-              style={{
-                position: 'absolute',
-                right: '12px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                border: 'none',
-                background: 'transparent',
-                color: 'var(--text-muted)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '2px'
-              }}
-            >
-              <X size={15} />
-            </button>
-          )}
-        </div>
-        
-        {/* Filters */}
-        <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
-          <CustomSelect 
-            value={deptFilter} 
-            onChange={val => { setDeptFilter(val); setPage(1); }} 
-            testId="employee-dept-filter"
-            options={departments.map(d => ({ value: d, label: d === 'all' ? 'All Departments' : d }))}
-            minWidth="160px"
-          />
-          
-          <CustomSelect 
-            value={statusFilter} 
-            onChange={val => { setStatusFilter(val); setPage(1); }} 
-            testId="employee-status-filter"
-            options={[
-              { value: 'all', label: 'All Status' },
-              { value: 'active', label: 'Active' },
-              { value: 'inactive', label: 'Inactive' }
-            ]}
-            minWidth="140px"
-          />
         </div>
       </div>
 
       {/* Main Content Area */}
-      {loading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="skeleton" style={{ height: 60, borderRadius: 'var(--radius-lg)' }} />
-          ))}
-        </div>
-      ) : employees.length === 0 ? (
-        <div 
-          className="card"
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 'var(--space-12)',
-            textAlign: 'center',
-            border: '1px solid var(--border-default)',
-            borderRadius: 'var(--radius-xl)',
-            backgroundColor: 'var(--bg-surface)'
-          }}
-        >
-          <div style={{ color: 'var(--text-muted)', marginBottom: 'var(--space-3)' }}>
-            <Users size={48} strokeWidth={1.5} />
+      <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {loading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', flex: 1 }}>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="skeleton" style={{ height: 60, borderRadius: 'var(--radius-lg)' }} />
+            ))}
           </div>
-          <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>No employees found</h3>
-          <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>Try adjusting your filters or search terms.</p>
-        </div>
-      ) : (
-        <>
-          {/* Table View Mode */}
-          {viewMode === 'table' ? (
-            <div 
-              className="data-table-wrapper animate-fadeInUp"
-              style={{
-                backgroundColor: 'var(--bg-surface)',
-                border: '1px solid var(--border-default)',
-                borderRadius: 'var(--radius-xl)',
-                boxShadow: 'var(--shadow-sm)',
-                overflow: 'hidden'
-              }}
-            >
+        ) : employees.length === 0 ? (
+          <div 
+            className="card"
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 'var(--space-12)',
+              textAlign: 'center',
+              border: '1px solid var(--border-default)',
+              borderRadius: 'var(--radius-xl)',
+              backgroundColor: 'var(--bg-surface)',
+              flex: 1
+            }}
+          >
+            <div style={{ color: 'var(--text-muted)', marginBottom: 'var(--space-3)' }}>
+              <Users size={48} strokeWidth={1.5} />
+            </div>
+            <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>No employees found</h3>
+            <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>Try adjusting your filters or search terms.</p>
+          </div>
+        ) : (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%', overflow: 'hidden' }}>
+            {/* Table View Mode */}
+            {viewMode === 'table' ? (
+              <div 
+                className="data-table-wrapper animate-fadeInUp"
+                style={{
+                  backgroundColor: 'var(--bg-surface)',
+                  border: '1px solid var(--border-default)',
+                  borderRadius: 'var(--radius-xl)',
+                  boxShadow: 'var(--shadow-sm)',
+                  overflow: 'hidden',
+                  minHeight: 0
+                }}
+              >
               <table className="data-table" data-testid="employee-table" role="table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border-default)', backgroundColor: 'rgba(248, 250, 252, 0.5)' }}>
@@ -406,21 +388,21 @@ export default function EmployeesPage() {
                       onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--bg-hover)'}
                       onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
-                      <td style={{ padding: '12px 20px' }}>
+                      <td style={{ padding: '16px 20px' }}>
                         <div className="flex items-center gap-3">
                           <div 
                             className="avatar avatar-sm" 
                             style={{ 
                               background: getAvatarColor(`${emp.firstName} ${emp.lastName}`),
-                              width: 32,
-                              height: 32,
+                              width: 38,
+                              height: 38,
                               borderRadius: '50%',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
                               color: '#fff',
                               fontWeight: 700,
-                              fontSize: '12px'
+                              fontSize: '14px'
                             }}
                           >
                             {emp.firstName[0]}{emp.lastName[0]}
@@ -435,10 +417,10 @@ export default function EmployeesPage() {
                           </Link>
                         </div>
                       </td>
-                      <td style={{ padding: '12px 20px', color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>
+                      <td style={{ padding: '16px 20px', color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>
                         {emp.email}
                       </td>
-                      <td style={{ padding: '12px 20px' }}>
+                      <td style={{ padding: '16px 20px' }}>
                         <span 
                           className="badge"
                           style={{
@@ -453,10 +435,10 @@ export default function EmployeesPage() {
                           {emp.department}
                         </span>
                       </td>
-                      <td style={{ padding: '12px 20px', color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', fontWeight: 500 }}>
+                      <td style={{ padding: '16px 20px', color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', fontWeight: 500 }}>
                         {emp.position}
                       </td>
-                      <td style={{ padding: '12px 20px' }}>
+                      <td style={{ padding: '16px 20px' }}>
                         <span 
                           style={{
                             display: 'inline-flex',
@@ -475,7 +457,7 @@ export default function EmployeesPage() {
                         </span>
                       </td>
                       {isAdmin && (
-                        <td style={{ padding: '12px 20px', textAlign: 'right' }}>
+                        <td style={{ padding: '16px 20px', textAlign: 'right' }}>
                           <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end' }}>
                             <button 
                               className="btn btn-ghost btn-sm" 
@@ -509,7 +491,11 @@ export default function EmployeesPage() {
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                gap: 'var(--space-5)'
+                gap: 'var(--space-5)',
+                overflow: 'hidden',
+                flex: 1,
+                minHeight: 0,
+                padding: 'var(--space-1) var(--space-1) var(--space-4) var(--space-1)'
               }}
             >
               {employees.map(emp => {
@@ -685,7 +671,8 @@ export default function EmployeesPage() {
                 alignItems: 'center',
                 paddingTop: 'var(--space-4)',
                 borderTop: '1px solid var(--border-default)',
-                marginTop: 'var(--space-2)'
+                marginTop: 'var(--space-4)',
+                flexShrink: 0
               }}
             >
               <span className="pagination-info" style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>
@@ -756,8 +743,9 @@ export default function EmployeesPage() {
               </div>
             </div>
           )}
-        </>
-      )}
+          </div>
+        )}
+      </div>
 
       {/* Slide-out Create/Edit Drawer */}
       {showModal && (

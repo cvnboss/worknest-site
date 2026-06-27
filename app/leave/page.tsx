@@ -77,6 +77,15 @@ export default function LeavePage() {
 
   useEffect(() => { fetchLeaves(); }, [fetchLeaves]);
 
+  // Listen to global open-add-leave event from Header
+  useEffect(() => {
+    const handleOpenCreate = () => {
+      setShowCreateModal(true);
+    };
+    window.addEventListener('open-add-leave', handleOpenCreate);
+    return () => window.removeEventListener('open-add-leave', handleOpenCreate);
+  }, []);
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     const res = await fetch('/api/leave', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(form) });
@@ -153,36 +162,6 @@ export default function LeavePage() {
 
   return (
     <div data-testid="leave-page" className="animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-4)' }}>
-        <div>
-          <h2 className="page-title" style={{ margin: 0, fontSize: '28px', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
-            Leave Management
-          </h2>
-          <p className="page-subtitle" style={{ margin: '4px 0 0 0', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
-            Request and track time off or remote work schedules.
-          </p>
-        </div>
-        <button 
-          className="btn btn-primary" 
-          onClick={() => setShowCreateModal(true)} 
-          data-testid="new-leave-btn"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 'var(--space-2)',
-            padding: '10px 18px',
-            fontWeight: 600,
-            borderRadius: 'var(--radius-lg)',
-            boxShadow: 'var(--shadow-sm)',
-            transition: 'transform 0.15s'
-          }}
-          onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
-          onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-        >
-          <Plus size={18} /> New Request
-        </button>
-      </div>
 
       {/* Bento Stats Indicators */}
       <div 
@@ -315,19 +294,21 @@ export default function LeavePage() {
           )}
         </div>
 
-        {/* Custom Premium Dropdown Filter */}
-        <CustomSelect 
-          value={statusFilter}
-          onChange={setStatusFilter}
-          testId="leave-status-filter"
-          options={[
-            { value: 'all', label: 'All Status' },
-            { value: 'pending', label: 'Pending' },
-            { value: 'approved', label: 'Approved' },
-            { value: 'rejected', label: 'Rejected' }
-          ]}
-          align="right"
-        />
+        {/* Filters and Actions */}
+        <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
+          <CustomSelect 
+            value={statusFilter}
+            onChange={setStatusFilter}
+            testId="leave-status-filter"
+            options={[
+              { value: 'all', label: 'All Status' },
+              { value: 'pending', label: 'Pending' },
+              { value: 'approved', label: 'Approved' },
+              { value: 'rejected', label: 'Rejected' }
+            ]}
+            align="right"
+          />
+        </div>
       </div>
 
       {/* Data Table */}
@@ -387,8 +368,8 @@ export default function LeavePage() {
                   </td>
                   <td style={{ padding: 'var(--space-4)' }}>
                     <span 
-                      className={`badge border`}
-                      style={{ fontSize: '11px', fontWeight: 600, textTransform: 'capitalize', padding: '2px 8px', borderRadius: 'var(--radius-sm)', ...Object.fromEntries(statusBadgeClasses(l.status).split(' ').map(c => [c, true])) }}
+                      className={`badge border ${statusBadgeClasses(l.status)}`}
+                      style={{ fontSize: '11px', fontWeight: 600, textTransform: 'capitalize', padding: '2px 8px', borderRadius: 'var(--radius-sm)' }}
                     >
                       {l.status}
                     </span>

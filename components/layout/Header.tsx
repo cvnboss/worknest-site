@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { Search, Bell } from 'lucide-react';
+import { Search, Bell, Plus } from 'lucide-react';
+import { useAuth } from '@/lib/auth-context';
 import NotificationPanel from './NotificationPanel';
 
 const pageTitles: Record<string, string> = {
@@ -25,9 +26,41 @@ function getPageTitle(pathname: string): string {
 export default function Header() {
   const pathname = usePathname();
   const title = getPageTitle(pathname);
+  const { user } = useAuth();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  const handleActionClick = () => {
+    if (pathname === '/tasks') {
+      window.dispatchEvent(new CustomEvent('open-add-task'));
+    } else if (pathname === '/employees') {
+      window.dispatchEvent(new CustomEvent('open-add-employee'));
+    } else if (pathname === '/leave') {
+      window.dispatchEvent(new CustomEvent('open-add-leave'));
+    } else if (pathname === '/announcements') {
+      window.dispatchEvent(new CustomEvent('open-add-announcement'));
+    }
+  };
+
+  const getActionLabel = () => {
+    if (pathname === '/tasks') return 'Add Task';
+    if (pathname === '/employees') return 'Add Employee';
+    if (pathname === '/leave') return 'New Request';
+    if (pathname === '/announcements') return 'New Announcement';
+    return '';
+  };
+
+  const shouldShowAction = () => {
+    if (pathname === '/tasks') return true;
+    if (pathname === '/employees') return user?.role === 'admin';
+    if (pathname === '/leave') return true;
+    if (pathname === '/announcements') return user?.role === 'admin' || user?.role === 'manager';
+    return false;
+  };
+
+  const actionLabel = getActionLabel();
+  const showAction = shouldShowAction();
 
   const handleNotificationClick = () => {
     setIsNotifOpen(!isNotifOpen);
@@ -69,6 +102,32 @@ export default function Header() {
       </div>
       
       <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
+        {showAction && (
+          <button
+            onClick={handleActionClick}
+            data-testid={pathname === '/tasks' ? 'add-task-btn' : pathname === '/employees' ? 'add-employee-btn' : pathname === '/leave' ? 'new-leave-btn' : 'new-announcement-btn'}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 'var(--space-2)',
+              padding: '0 16px',
+              height: '36px',
+              fontWeight: 600,
+              fontSize: 'var(--text-sm)',
+              borderRadius: 'var(--radius-md)',
+              background: 'linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%)',
+              color: '#ffffff',
+              border: 'none',
+              cursor: 'pointer',
+              boxShadow: 'var(--shadow-sm)',
+              transition: 'all 0.15s ease'
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+          >
+            <Plus size={16} /> {actionLabel}
+          </button>
+        )}
         {/* Search bar */}
         <div className="header-search" style={{ position: 'relative', display: 'flex', alignItems: 'center' }} data-testid="header-search">
           <span 
@@ -79,7 +138,8 @@ export default function Header() {
               color: isSearchFocused ? '#4F46E5' : 'var(--text-muted)', 
               display: 'flex', 
               pointerEvents: 'none',
-              zIndex: 1
+              zIndex: 1,
+              transition: 'color 0.15s ease'
             }}
           >
             <Search size={16} />
@@ -99,9 +159,9 @@ export default function Header() {
               fontSize: 'var(--text-sm)',
               borderRadius: 'var(--radius-md)',
               border: isSearchFocused ? '1px solid #4F46E5' : '1px solid var(--border-default)',
-              boxShadow: isSearchFocused ? '0 0 0 3px rgba(79, 70, 229, 0.1)' : 'none',
+              boxShadow: isSearchFocused ? '0 0 0 1px rgba(79, 70, 229, 0.15)' : 'none',
               backgroundColor: 'var(--bg-surface)',
-              width: isSearchFocused ? '240px' : '200px',
+              width: '240px',
               transition: 'all 0.15s ease-in-out',
               color: 'var(--text-primary)',
               outline: 'none'
@@ -126,25 +186,27 @@ export default function Header() {
               border: isNotifOpen ? '1px solid rgba(79, 70, 229, 0.15)' : '1px solid transparent',
               borderRadius: 'var(--radius-lg)',
               cursor: 'pointer',
-              transition: 'all 0.15s'
+              transition: 'all 0.15s ease'
             }} 
             data-testid="notification-btn" 
             aria-label="Notifications"
             onClick={handleNotificationClick}
             onMouseEnter={e => {
+              e.currentTarget.style.transform = 'scale(1.05)';
               if (!isNotifOpen) {
                 e.currentTarget.style.backgroundColor = 'var(--bg-hover)';
                 e.currentTarget.style.color = 'var(--text-primary)';
               }
             }}
             onMouseLeave={e => {
+              e.currentTarget.style.transform = 'none';
               if (!isNotifOpen) {
                 e.currentTarget.style.backgroundColor = 'transparent';
                 e.currentTarget.style.color = 'var(--text-secondary)';
               }
             }}
           >
-            <Bell size={18} />
+            <Bell size={18} style={{ transition: 'transform 0.15s ease' }} />
             {unreadCount > 0 && (
               <span 
                 style={{ 

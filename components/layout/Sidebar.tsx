@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import { getAvatarColor } from '@/lib/utils';
 
 import { 
   LayoutDashboard, Users, CalendarDays, Calendar, CalendarCheck,
@@ -26,14 +27,7 @@ function getInitials(firstName: string, lastName: string) {
   return `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
 }
 
-function getAvatarColor(name: string) {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const hue = Math.abs(hash % 360);
-  return `hsl(${hue}, 65%, 55%)`;
-}
+
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -156,12 +150,14 @@ export default function Sidebar() {
                     borderRadius: 'var(--radius-lg)',
                     color: isActive ? '#4F46E5' : 'var(--text-secondary)',
                     backgroundColor: isActive 
-                      ? 'rgba(79, 70, 229, 0.06)' 
+                      ? 'rgba(79, 70, 229, 0.08)' 
                       : (isHovered ? 'var(--bg-hover)' : 'transparent'),
+                    border: isActive ? '1px solid rgba(79, 70, 229, 0.12)' : '1px solid transparent',
+                    boxShadow: isActive ? 'inset 0 0 0 1px rgba(255, 255, 255, 0.4), var(--shadow-sm)' : 'none',
                     fontWeight: isActive ? 700 : 500,
                     textDecoration: 'none',
                     fontSize: 'var(--text-sm)',
-                    transition: 'all 0.15s ease',
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                     justifyContent: collapsed ? 'center' : 'flex-start'
                   }}
                 >
@@ -171,11 +167,12 @@ export default function Sidebar() {
                       style={{
                         position: 'absolute',
                         left: 0,
-                        top: '25%',
-                        height: '50%',
-                        width: '3px',
+                        top: '20%',
+                        height: '60%',
+                        width: '3.5px',
                         backgroundColor: '#4F46E5',
-                        borderRadius: '0 4px 4px 0'
+                        borderRadius: '0 9999px 9999px 0',
+                        boxShadow: '0 0 8px rgba(79, 70, 229, 0.5)'
                       }}
                     />
                   )}
@@ -188,8 +185,8 @@ export default function Sidebar() {
                       alignItems: 'center',
                       justifyContent: 'center',
                       color: isActive ? '#4F46E5' : 'var(--text-secondary)',
-                      transform: isHovered ? 'scale(1.1)' : 'none',
-                      transition: 'transform 0.15s ease'
+                      transform: isHovered ? 'scale(1.12) translateY(-0.5px)' : 'none',
+                      transition: 'transform 0.18s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}
                   >
                     <item.icon size={18} />
@@ -249,10 +246,12 @@ export default function Sidebar() {
               gap: '10px',
               padding: collapsed ? '8px' : '10px',
               borderRadius: 'var(--radius-xl)',
-              backgroundColor: 'rgba(241, 245, 249, 0.5)',
+              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(241, 245, 249, 0.8) 100%)',
               border: '1px solid var(--border-default)',
+              boxShadow: 'var(--shadow-sm)',
               marginTop: '4px',
-              justifyContent: collapsed ? 'center' : 'flex-start'
+              justifyContent: collapsed ? 'center' : 'flex-start',
+              transition: 'all 0.2s ease'
             }}
           >
             <div 

@@ -1,6 +1,6 @@
 import { SignJWT, jwtVerify } from 'jose';
 
-const JWT_SECRET = new TextEncoder().encode('worknest-secret-key-2026-very-secure');
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'worknest-secret-key-2026-demo-only');
 
 export async function signToken(payload: { userId: string; email: string; role: string }): Promise<string> {
   return new SignJWT(payload)
@@ -26,6 +26,7 @@ export function extractToken(request: Request): string | null {
   return match ? match[1] : null;
 }
 
+// WARNING: Demo-only hash function. Use bcrypt/scrypt in production.
 export function hashPassword(password: string): string {
   // Simple hash for demo purposes - NOT for production
   let hash = 0;

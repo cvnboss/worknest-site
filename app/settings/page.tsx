@@ -3,13 +3,8 @@
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useToast } from '@/lib/toast-context';
-import { User, Lock, Bell, ShieldCheck, Check, Info } from 'lucide-react';
-
-function getAvatarColor(name: string) { 
-  let h = 0; 
-  for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h); 
-  return `hsl(${Math.abs(h % 360)}, 65%, 55%)`; 
-}
+import { User, Lock, Bell, ShieldCheck, Check, Info, Settings as SettingsIcon } from 'lucide-react';
+import { getAvatarColor } from '@/lib/utils';
 
 const ToggleSwitch = ({ checked, onChange, testId, label }: { checked: boolean; onChange: (checked: boolean) => void; testId: string; label: string }) => {
   return (
@@ -70,8 +65,33 @@ const ToggleSwitch = ({ checked, onChange, testId, label }: { checked: boolean; 
 };
 
 export default function SettingsPage() {
-  const { user, token, updateUser } = useAuth();
+  const { user, token, updateUser, logout } = useAuth();
   const { addToast } = useToast();
+  const [isResetting, setIsResetting] = useState(false);
+
+  const handleResetState = async () => {
+    setIsResetting(true);
+    try {
+      const res = await fetch('/api/seed', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        addToast({ type: 'success', title: 'System Reset', message: 'All application state has been reset to default.' });
+        setTimeout(() => {
+          localStorage.clear();
+          logout();
+        }, 1500);
+      } else {
+        addToast({ type: 'error', title: 'Reset Failed', message: data.error || 'Failed to reset system data.' });
+        setIsResetting(false);
+      }
+    } catch (err) {
+      addToast({ type: 'error', title: 'Network Error', message: 'Failed to connect to system seed API.' });
+      setIsResetting(false);
+    }
+  };
   const [profile, setProfile] = useState({ 
     firstName: user?.firstName || '', 
     lastName: user?.lastName || '', 
@@ -145,21 +165,12 @@ export default function SettingsPage() {
     { id: 'profile-section', label: 'Profile Settings', icon: <User size={18} /> },
     { id: 'password-section', label: 'Security & Password', icon: <Lock size={18} /> },
     { id: 'notifications-section', label: 'Notifications', icon: <Bell size={18} /> },
-    { id: 'account-section', label: 'Account Summary', icon: <ShieldCheck size={18} /> }
+    { id: 'account-section', label: 'Account Summary', icon: <ShieldCheck size={18} /> },
+    { id: 'system-section', label: 'System Settings', icon: <SettingsIcon size={18} /> }
   ];
 
   return (
     <div data-testid="settings-page" className="animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
-      {/* Header */}
-      <div style={{ borderBottom: '1px solid var(--border-default)', paddingBottom: 'var(--space-4)' }}>
-        <h2 className="page-title" style={{ margin: 0, fontSize: '28px', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
-          Settings
-        </h2>
-        <p className="page-subtitle" style={{ margin: '4px 0 0 0', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
-          Manage your account credentials, notifications and profile.
-        </p>
-      </div>
-
       {/* Split Layout Container */}
       <div style={{ display: 'flex', gap: 'var(--space-6)', alignItems: 'flex-start', flexWrap: 'wrap' }}>
         
@@ -640,6 +651,110 @@ export default function SettingsPage() {
                 >
                   {user.id}
                 </span>
+              </div>
+            </div>
+          </div>
+
+          {/* System Settings Section */}
+          <div 
+            id="system-section" 
+            className="card animate-fadeInUp" 
+            data-testid="system-section"
+            style={{
+              backgroundColor: 'var(--bg-surface)',
+              borderRadius: 'var(--radius-xl)',
+              border: '1px solid var(--border-default)',
+              boxShadow: 'var(--shadow-sm)',
+              overflow: 'hidden'
+            }}
+          >
+            <div 
+              style={{
+                padding: 'var(--space-5) var(--space-5) 0 var(--space-5)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '2px'
+              }}
+            >
+              <h3 className="card-title flex items-center gap-2" style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>
+                <SettingsIcon size={18} style={{ color: '#4F46E5' }} /> System Settings
+              </h3>
+              <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', margin: 0 }}>
+                Manage workspace defaults and reset application environment data.
+              </p>
+            </div>
+            
+            <div className="card-body" style={{ padding: 'var(--space-5)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+              <div 
+                style={{
+                  display: 'flex',
+                  gap: 'var(--space-3)',
+                  padding: 'var(--space-4)',
+                  background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.04) 0%, rgba(249, 115, 22, 0.04) 100%)',
+                  border: '1px solid rgba(239, 68, 68, 0.15)',
+                  borderRadius: 'var(--radius-xl)',
+                  alignItems: 'flex-start'
+                }}
+              >
+                <div style={{ color: '#EF4444', display: 'flex', marginTop: '2px' }}>
+                  <Info size={18} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <span style={{ fontWeight: 700, fontSize: 'var(--text-sm)', color: '#DC2626' }}>
+                    Danger Zone: Reset Application State
+                  </span>
+                  <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                    Resets the in-memory database to its initial seeded state, deletes all user updates, clears active session storage, and logs you out immediately. This action is irreversible.
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'var(--space-2)' }}>
+                <button
+                  onClick={handleResetState}
+                  disabled={isResetting}
+                  data-testid="reset-state-btn"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 'var(--space-2)',
+                    padding: '10px 20px',
+                    borderRadius: 'var(--radius-lg)',
+                    fontWeight: 600,
+                    fontSize: 'var(--text-sm)',
+                    cursor: isResetting ? 'not-allowed' : 'pointer',
+                    background: 'linear-gradient(135deg, #EF4444 0%, #E11D48 100%)',
+                    color: '#ffffff',
+                    border: 'none',
+                    boxShadow: '0 4px 12px rgba(239, 68, 68, 0.25)',
+                    transition: 'all 0.2s ease',
+                    opacity: isResetting ? 0.7 : 1
+                  }}
+                  onMouseEnter={e => {
+                    if (!isResetting) {
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 6px 16px rgba(239, 68, 68, 0.35)';
+                    }
+                  }}
+                  onMouseLeave={e => {
+                    if (!isResetting) {
+                      e.currentTarget.style.transform = 'none';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.25)';
+                    }
+                  }}
+                  onMouseDown={e => {
+                    if (!isResetting) {
+                      e.currentTarget.style.transform = 'scale(0.98)';
+                    }
+                  }}
+                  onMouseUp={e => {
+                    if (!isResetting) {
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                    }
+                  }}
+                >
+                  {isResetting ? 'Resetting System...' : 'Reset Application State'}
+                </button>
               </div>
             </div>
           </div>

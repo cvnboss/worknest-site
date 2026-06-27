@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import store from '@/lib/store';
+import { pickFields } from '@/lib/api-utils';
 import { verifyToken, extractToken } from '@/lib/auth';
 import { ensureSeeded } from '@/lib/seed';
 
@@ -19,8 +20,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     void _;
 
     return NextResponse.json({ success: true, data: employee });
-  } catch {
-    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  } catch (error) {
+    console.error('[employees/id GET] error:', error);
+    if (error instanceof Error && (error.message.includes('JWS') || error.message.includes('JWT'))) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -38,9 +43,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     const { id } = await params;
     const body = await request.json();
-
-    const { password, ...updates } = body;
-    void password;
+    const updates = pickFields(body, ['firstName', 'lastName', 'email', 'phone', 'department', 'position', 'status', 'avatar', 'joinDate']);
 
     const updated = store.update('users', id, updates);
     if (!updated) return NextResponse.json({ success: false, error: 'Employee not found' }, { status: 404 });
@@ -49,8 +52,12 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     void _;
 
     return NextResponse.json({ success: true, data: employee, message: 'Employee updated' });
-  } catch {
-    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  } catch (error) {
+    console.error('[employees/id PUT] error:', error);
+    if (error instanceof Error && (error.message.includes('JWS') || error.message.includes('JWT'))) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -76,7 +83,11 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     if (!deleted) return NextResponse.json({ success: false, error: 'Employee not found' }, { status: 404 });
 
     return NextResponse.json({ success: true, message: 'Employee deleted' });
-  } catch {
-    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  } catch (error) {
+    console.error('[employees/id DELETE] error:', error);
+    if (error instanceof Error && (error.message.includes('JWS') || error.message.includes('JWT'))) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

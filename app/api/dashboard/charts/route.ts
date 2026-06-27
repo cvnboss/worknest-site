@@ -92,7 +92,11 @@ export async function GET(request: Request) {
         employeesByDepartment
       },
     });
-  } catch {
-    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  } catch (error) {
+    console.error('[dashboard/charts] error:', error);
+    if (error instanceof Error && (error.message.includes('JWS') || error.message.includes('JWT'))) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

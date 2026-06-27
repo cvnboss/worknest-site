@@ -17,8 +17,8 @@ export async function GET(request: Request) {
     const status = url.searchParams.get('status') || '';
     const sortBy = url.searchParams.get('sortBy') || 'firstName';
     const sortOrder = (url.searchParams.get('sortOrder') || 'asc') as 'asc' | 'desc';
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const limit = parseInt(url.searchParams.get('limit') || '10');
+    const page = parseInt(url.searchParams.get('page') || '1') || 1;
+    const limit = parseInt(url.searchParams.get('limit') || '10') || 10;
 
     let employees = store.getAll('users').map(u => {
       const { password: _, ...emp } = u;

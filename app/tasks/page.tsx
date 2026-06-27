@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth-context';
 import { useToast } from '@/lib/toast-context';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { Search, Calendar, Trash2, Plus, X, Filter, Tag, CheckCircle2, Circle, Clock, ChevronRight, AlertCircle } from 'lucide-react';
+import { getAvatarColor } from '@/lib/utils';
 
 interface TaskData {
   id: string;
@@ -28,13 +29,7 @@ const columns = [
   { id: 'done', label: 'Done', color: '#059669', lightBg: 'rgba(5, 150, 105, 0.08)', dotColor: '#10B981' },
 ];
 
-function getAvatarColor(name: string) {
-  let h = 0;
-  for (let i = 0; i < name.length; i++) {
-    h = name.charCodeAt(i) + ((h << 5) - h);
-  }
-  return `hsl(${Math.abs(h % 360)}, 65%, 50%)`;
-}
+
 
 function getPriorityBadgeClass(priority: string) {
   const map: Record<string, string> = {
@@ -78,6 +73,25 @@ export default function TasksPage() {
     }, 300);
     return () => clearTimeout(handler);
   }, [searchInput]);
+
+  // Listen to global open-add-task event from Header
+  useEffect(() => {
+    const handleOpenCreate = () => {
+      setEditingTask(null);
+      setForm({
+        title: '',
+        description: '',
+        assignee: user?.id || '',
+        priority: 'medium',
+        status: 'todo',
+        dueDate: '',
+        tags: ''
+      });
+      setShowModal(true);
+    };
+    window.addEventListener('open-add-task', handleOpenCreate);
+    return () => window.removeEventListener('open-add-task', handleOpenCreate);
+  }, [user]);
 
   const fetchTasks = useCallback(async (silent = false) => {
     if (!token) return;
@@ -208,13 +222,13 @@ export default function TasksPage() {
       const data = await res.json();
       if (!data.success) {
         setTasks(originalTasks);
-        addToast({ type: 'error', title: 'Lỗi cập nhật trạng thái', message: data.error });
+        addToast({ type: 'error', title: 'Status update failed', message: data.error });
       } else {
         fetchTasks(true); // Silent sync in the background
       }
     } catch (err) {
       setTasks(originalTasks);
-      addToast({ type: 'error', title: 'Lỗi mạng', message: 'Không thể kết nối đến máy chủ.' });
+      addToast({ type: 'error', title: 'Network error', message: 'Unable to connect to server.' });
     }
   };
 
@@ -233,85 +247,63 @@ export default function TasksPage() {
 
   return (
     <div data-testid="tasks-page" className="animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
-      {/* Header section */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-4)' }}>
-        <div>
-          <h2 className="page-title" style={{ margin: 0, fontSize: '28px', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
-            Task Board
-          </h2>
-          <p className="page-subtitle" style={{ margin: '4px 0 0 0', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
-            Manage and track your project tasks on a visual Kanban board.
-          </p>
-        </div>
-        <button 
-          className="btn btn-primary" 
-          onClick={openCreateModal} 
-          data-testid="add-task-btn"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 'var(--space-2)',
-            padding: '10px 18px',
-            fontWeight: 600,
-            borderRadius: 'var(--radius-lg)',
-            boxShadow: 'var(--shadow-sm)',
-            transition: 'transform 0.15s'
-          }}
-          onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
-          onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-        >
-          <Plus size={18} /> Add Task
-        </button>
-      </div>
 
       {/* Filter and Legend Bar */}
       <div className="filter-bar" style={{
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center', 
-        flexWrap: 'wrap', 
         gap: 'var(--space-4)',
         padding: 'var(--space-4)',
         backgroundColor: 'var(--bg-surface)',
         border: '1px solid var(--border-default)',
         borderRadius: 'var(--radius-xl)',
         boxShadow: 'var(--shadow-sm)',
-        marginBottom: 'var(--space-6)'
+        marginBottom: 'var(--space-4)'
       }}>
-        <div style={{ display: 'flex', gap: 'var(--space-3)', flex: 1, minWidth: '280px', flexWrap: 'wrap' }}>
-          <div className="search-bar" style={{ flex: 1, minWidth: '200px', margin: 0 }}>
-            <span className="search-bar-icon"><Search size={18} /></span>
-            <input 
-              className="search-bar-input" 
-              placeholder="Search tasks by title or desc..." 
-              value={searchInput} 
-              onChange={e => setSearchInput(e.target.value)} 
-              data-testid="task-search" 
-              style={{ height: '40px', paddingLeft: '38px', fontSize: 'var(--text-sm)' }}
-            />
-          </div>
-          <CustomSelect
-            value={priorityFilter}
-            onChange={setPriorityFilter}
-            testId="task-filter-priority"
-            options={[
-              { value: 'all', label: 'All Priorities' },
-              { value: 'urgent', label: 'Urgent' },
-              { value: 'high', label: 'High' },
-              { value: 'medium', label: 'Medium' },
-              { value: 'low', label: 'Low' }
-            ]}
+        <div className="search-bar" style={{ flex: 1, minWidth: '200px', margin: 0 }}>
+          <span className="search-bar-icon"><Search size={18} /></span>
+          <input 
+            className="search-bar-input" 
+            placeholder="Search tasks by title or desc..." 
+            value={searchInput} 
+            onChange={e => setSearchInput(e.target.value)} 
+            data-testid="task-search" 
+            style={{ height: '40px', paddingLeft: '38px', fontSize: 'var(--text-sm)', width: '100%' }}
           />
         </div>
+        <CustomSelect
+          value={priorityFilter}
+          onChange={setPriorityFilter}
+          testId="task-filter-priority"
+          options={[
+            { value: 'all', label: 'All Priorities' },
+            { value: 'urgent', label: 'Urgent' },
+            { value: 'high', label: 'High' },
+            { value: 'medium', label: 'Medium' },
+            { value: 'low', label: 'Low' }
+          ]}
+        />
+      </div>
 
-        {/* Priority Color Legend */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
-          <span style={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>Priority:</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#EF4444' }} /> Urgent</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#F97316' }} /> High</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#3B82F6' }} /> Medium</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#94A3B8' }} /> Low</span>
-        </div>
+      {/* Priority Color Legend */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'flex-end', 
+        alignItems: 'center', 
+        gap: 'var(--space-4)', 
+        fontSize: 'var(--text-xs)', 
+        color: 'var(--text-secondary)', 
+        padding: '0 var(--space-2)', 
+        marginTop: '-4px', 
+        marginBottom: '4px',
+        flexWrap: 'wrap'
+      }}>
+        <span style={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>Priority Legend:</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#EF4444' }} /> Urgent</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#F97316' }} /> High</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#3B82F6' }} /> Medium</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#94A3B8' }} /> Low</span>
       </div>
 
       {/* Kanban Board Container */}

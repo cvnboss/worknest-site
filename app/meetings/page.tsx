@@ -133,38 +133,44 @@ export default function MeetingsPage() {
   const getRoomMeetings = (roomId: string) => meetings.filter(m => m.roomId === roomId && m.status === 'scheduled');
 
   return (
-    <div data-testid="meetings-page" className="animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
-      {/* Page Header */}
+    <div data-testid="meetings-page" className="animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 128px)', overflow: 'hidden' }}>
+      {/* Date Selector Row */}
       <div 
-        style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          flexWrap: 'wrap', 
+        className="filter-bar animate-fadeIn"
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
           gap: 'var(--space-4)',
-          borderBottom: '1px solid var(--border-default)',
-          paddingBottom: 'var(--space-4)'
+          background: 'var(--bg-surface)',
+          padding: 'var(--space-4)',
+          borderRadius: 'var(--radius-xl)',
+          border: '1px solid var(--border-default)',
+          boxShadow: 'var(--shadow-sm)',
+          flexShrink: 0,
+          marginBottom: 'var(--space-4)'
         }}
       >
-        <div>
-          <h2 className="page-title" style={{ margin: 0, fontSize: '28px', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
-            Meeting Rooms
-          </h2>
-          <p className="page-subtitle" style={{ margin: '4px 0 0 0', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>
-            Book a room and manage your schedules.
-          </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', height: '40px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)', fontWeight: 700, fontSize: 'var(--text-base)' }}>
+            <Clock size={18} style={{ color: '#4F46E5' }} />
+            Daily Schedule
+          </div>
+          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', fontWeight: 600, backgroundColor: 'rgba(241, 245, 249, 0.8)', padding: '6px 12px', borderRadius: 'var(--radius-full)' }}>
+            {rooms.length} rooms available
+          </span>
         </div>
-        
         <div 
           style={{ 
             display: 'flex', 
             alignItems: 'center', 
             gap: 'var(--space-3)', 
-            backgroundColor: 'var(--bg-surface)', 
-            padding: '8px 16px', 
-            borderRadius: 'var(--radius-xl)', 
+            backgroundColor: 'rgba(241, 245, 249, 0.7)', 
+            padding: '0 14px', 
+            borderRadius: 'var(--radius-lg)', 
             border: '1px solid var(--border-default)',
-            boxShadow: 'var(--shadow-xs)'
+            height: '40px'
           }}
         >
           <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', fontWeight: 600 }}>
@@ -175,11 +181,11 @@ export default function MeetingsPage() {
             className="form-input" 
             style={{ 
               width: 140, 
-              padding: '4px 8px', 
+              padding: '2px 4px', 
               border: 'none', 
               outline: 'none', 
               fontSize: 'var(--text-sm)', 
-              fontWeight: 500,
+              fontWeight: 600,
               cursor: 'pointer',
               backgroundColor: 'transparent'
             }} 
@@ -203,7 +209,8 @@ export default function MeetingsPage() {
           style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', 
-            gap: 'var(--space-5)' 
+            gap: 'var(--space-5)',
+            paddingBottom: 'var(--space-4)'
           }}
         >
           {rooms.map(room => {

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import store from '@/lib/store';
+import { pickFields } from '@/lib/api-utils';
 import { verifyToken, extractToken } from '@/lib/auth';
 import { ensureSeeded } from '@/lib/seed';
 
@@ -15,8 +16,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     const task = store.getById('tasks', id);
     if (!task) return NextResponse.json({ success: false, error: 'Task not found' }, { status: 404 });
     return NextResponse.json({ success: true, data: task });
-  } catch {
-    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  } catch (error) {
+    console.error('[tasks/id GET] error:', error);
+    if (error instanceof Error && (error.message.includes('JWS') || error.message.includes('JWT'))) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -39,19 +44,24 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     }
 
     const body = await request.json();
+    const updates = pickFields(body, ['title', 'description', 'assignee', 'priority', 'status', 'dueDate', 'tags']);
 
-    if (body.assignee) {
-      const assigneeUser = store.getById('users', body.assignee);
+    if (updates.assignee) {
+      const assigneeUser = store.getById('users', updates.assignee);
       if (assigneeUser) {
-        body.assigneeName = `${assigneeUser.firstName} ${assigneeUser.lastName}`;
+        updates.assigneeName = `${assigneeUser.firstName} ${assigneeUser.lastName}`;
       }
     }
 
-    const updated = store.update('tasks', id, { ...body, updatedAt: new Date().toISOString() });
+    const updated = store.update('tasks', id, { ...updates, updatedAt: new Date().toISOString() });
     if (!updated) return NextResponse.json({ success: false, error: 'Task not found' }, { status: 404 });
     return NextResponse.json({ success: true, data: updated, message: 'Task updated' });
-  } catch {
-    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  } catch (error) {
+    console.error('[tasks/id PUT] error:', error);
+    if (error instanceof Error && (error.message.includes('JWS') || error.message.includes('JWT'))) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -69,7 +79,11 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     }
     store.delete('tasks', id);
     return NextResponse.json({ success: true, message: 'Task deleted' });
-  } catch {
-    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  } catch (error) {
+    console.error('[tasks/id DELETE] error:', error);
+    if (error instanceof Error && (error.message.includes('JWS') || error.message.includes('JWT'))) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

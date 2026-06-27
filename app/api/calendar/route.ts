@@ -92,7 +92,7 @@ export async function GET(request: Request) {
                     color: 'var(--success)',
                     metadata: { leaveType: l.type }
                 });
-                currentDate.setDate(currentDate.getDate() + 1);
+                currentDate.setUTCDate(currentDate.getUTCDate() + 1);
             }
         }
     });
@@ -100,21 +100,24 @@ export async function GET(request: Request) {
     // 4. Birthdays (mocked based on joinDate month/day for demo since birthDate is missing)
     const users = store.getAll('users') as Employee[];
     users.filter(u => u.status === 'active' && u.joinDate).forEach(u => {
-        // use joinDate as fake birthday
+        // use joinDate as fake birthday/anniversary
         const joinDateParts = u.joinDate.split('-');
         if (joinDateParts.length === 3) {
-            const currentYear = startDate.getFullYear();
-            const bdayDateStr = `${currentYear}-${joinDateParts[1]}-${joinDateParts[2]}`;
-            const bdayDate = new Date(bdayDateStr);
-            if (bdayDate >= startDate && bdayDate <= endDate) {
-                events.push({
-                    id: `bd-${u.id}-${currentYear}`,
-                    type: 'birthday',
-                    title: `🎂 ${u.firstName}'s Work Anniversary`,
-                    date: bdayDateStr,
-                    color: 'var(--warning)',
-                    metadata: { employeeName: `${u.firstName} ${u.lastName}` }
-                });
+            const startYear = startDate.getUTCFullYear();
+            const endYear = endDate.getUTCFullYear();
+            for (let year = startYear; year <= endYear; year++) {
+                const bdayDateStr = `${year}-${joinDateParts[1]}-${joinDateParts[2]}`;
+                const bdayDate = new Date(bdayDateStr);
+                if (bdayDate >= startDate && bdayDate <= endDate) {
+                    events.push({
+                        id: `bd-${u.id}-${year}`,
+                        type: 'birthday',
+                        title: `🎂 ${u.firstName}'s Work Anniversary`,
+                        date: bdayDateStr,
+                        color: 'var(--warning)',
+                        metadata: { employeeName: `${u.firstName} ${u.lastName}` }
+                    });
+                }
             }
         }
     });

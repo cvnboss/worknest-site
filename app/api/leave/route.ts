@@ -16,8 +16,8 @@ export async function GET(request: Request) {
     const type = url.searchParams.get('type') || '';
     const userId = url.searchParams.get('userId') || '';
     const view = url.searchParams.get('view') || 'my';
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const limit = parseInt(url.searchParams.get('limit') || '20');
+    const page = parseInt(url.searchParams.get('page') || '1') || 1;
+    const limit = parseInt(url.searchParams.get('limit') || '20') || 20;
 
     let leaves = store.getAll('leaves');
 
@@ -69,6 +69,10 @@ export async function POST(request: Request) {
 
     if (new Date(startDate) > new Date(endDate)) {
       return NextResponse.json({ success: false, error: 'Start date must be before or equal to end date' }, { status: 400 });
+    }
+
+    if (isNaN(new Date(startDate).getTime()) || isNaN(new Date(endDate).getTime())) {
+      return NextResponse.json({ success: false, error: 'Invalid date format' }, { status: 400 });
     }
 
     const leave = store.create('leaves', {

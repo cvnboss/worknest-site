@@ -17,6 +17,7 @@ import {
   Legend,
 } from 'chart.js';
 import { Doughnut, Line, Bar } from 'react-chartjs-2';
+import { timeAgo } from '@/lib/utils';
 
 ChartJS.register(
   CategoryScale,
@@ -111,14 +112,7 @@ export default function DashboardPage() {
     return map[p] || 'badge-neutral';
   };
 
-  const timeAgo = (timestamp: string) => {
-    const diff = Date.now() - new Date(timestamp).getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 60) return `${mins}m ago`;
-    const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours}h ago`;
-    return `${Math.floor(hours / 24)}d ago`;
-  };
+
 
   if (loading) {
     return (
