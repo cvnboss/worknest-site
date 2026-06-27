@@ -9,6 +9,7 @@ import NotificationPanel from './NotificationPanel';
 const pageTitles: Record<string, string> = {
   '/': 'Dashboard',
   '/employees': 'Employee Directory',
+  '/departments': 'Departments',
   '/leave': 'Leave Management',
   '/meetings': 'Meeting Rooms',
   '/tasks': 'Task Board',
@@ -36,6 +37,8 @@ export default function Header() {
       window.dispatchEvent(new CustomEvent('open-add-task'));
     } else if (pathname === '/employees') {
       window.dispatchEvent(new CustomEvent('open-add-employee'));
+    } else if (pathname === '/departments') {
+      window.dispatchEvent(new CustomEvent('open-add-department'));
     } else if (pathname === '/leave') {
       window.dispatchEvent(new CustomEvent('open-add-leave'));
     } else if (pathname === '/announcements') {
@@ -46,6 +49,7 @@ export default function Header() {
   const getActionLabel = () => {
     if (pathname === '/tasks') return 'Add Task';
     if (pathname === '/employees') return 'Add Employee';
+    if (pathname === '/departments') return 'New Department';
     if (pathname === '/leave') return 'New Request';
     if (pathname === '/announcements') return 'New Announcement';
     return '';
@@ -54,6 +58,7 @@ export default function Header() {
   const shouldShowAction = () => {
     if (pathname === '/tasks') return true;
     if (pathname === '/employees') return user?.role === 'admin';
+    if (pathname === '/departments') return user?.role === 'admin';
     if (pathname === '/leave') return true;
     if (pathname === '/announcements') return user?.role === 'admin' || user?.role === 'manager';
     return false;
@@ -105,7 +110,7 @@ export default function Header() {
         {showAction && (
           <button
             onClick={handleActionClick}
-            data-testid={pathname === '/tasks' ? 'add-task-btn' : pathname === '/employees' ? 'add-employee-btn' : pathname === '/leave' ? 'new-leave-btn' : 'new-announcement-btn'}
+            data-testid={pathname === '/tasks' ? 'add-task-btn' : pathname === '/employees' ? 'add-employee-btn' : pathname === '/departments' ? 'add-department-btn' : pathname === '/leave' ? 'new-leave-btn' : 'new-announcement-btn'}
             style={{
               display: 'inline-flex',
               alignItems: 'center',

@@ -7,6 +7,7 @@ export const COLLECTIONS = {
   TASKS: 'tasks',
   ANNOUNCEMENTS: 'announcements',
   NOTIFICATIONS: 'notifications',
+  DEPARTMENTS: 'departments',
 } as const;
 
 export type CollectionName = typeof COLLECTIONS[keyof typeof COLLECTIONS];
@@ -35,6 +36,10 @@ export type TaskStatus = typeof TASK_STATUS[number];
 export const EMPLOYEE_STATUS = ['active', 'inactive'] as const;
 export type EmployeeStatus = typeof EMPLOYEE_STATUS[number];
 
+// Department status enums
+export const DEPARTMENT_STATUS = ['active', 'inactive'] as const;
+export type DepartmentStatus = typeof DEPARTMENT_STATUS[number];
+
 // Meeting status enums
 export const MEETING_STATUS = ['scheduled', 'cancelled', 'completed'] as const;
 export type MeetingStatus = typeof MEETING_STATUS[number];
@@ -53,4 +58,6 @@ export const MAX_LENGTHS = {
   PHONE: 20,
   CONTENT: 5000,
   NOTE: 500,
+  DEPARTMENT_NAME: 80,
+  DEPARTMENT_DESCRIPTION: 500,
 } as const;

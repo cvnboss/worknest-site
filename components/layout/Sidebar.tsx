@@ -15,6 +15,7 @@ import {
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard, section: 'MAIN' },
   { href: '/employees', label: 'Employees', icon: Users, section: 'MAIN' },
+  { href: '/departments', label: 'Departments', icon: Building2, section: 'MAIN' },
   { href: '/leave', label: 'Leave', icon: CalendarDays, section: 'MAIN' },
   { href: '/meetings', label: 'Meetings', icon: Calendar, section: 'MAIN' },
   { href: '/calendar', label: 'Calendar', icon: CalendarCheck, section: 'MAIN' },

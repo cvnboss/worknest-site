@@ -28,3 +28,11 @@ export function pickFields(body: Record<string, any>, allowedFields: string[]): 
   }
   return result;
 }
+
+export function normalizeDepartmentName(name: string): string {
+  return name.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+export function isJwtError(error: unknown): boolean {
+  return error instanceof Error && (error.message.includes('JWS') || error.message.includes('JWT'));
+}
