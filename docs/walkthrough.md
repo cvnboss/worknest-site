@@ -1,4 +1,4 @@
-# WorkNest — Implementation Walkthrough
+# WorkNest - Implementation Walkthrough
 
 ## Overview
 
@@ -11,18 +11,18 @@
 ## Verification Results
 
 ### Build
-- ✅ `next build` — **compiled successfully** with Next.js 15.5.19
-- ✅ **0 type errors**, 0 lint errors
-- ✅ 8 static pages + 18 serverless API routes
+- `next build` - **compiled successfully** with Next.js 15.5.19
+- **0 type errors**, 0 lint errors
+- 8 static pages + 18 serverless API routes
 
 ### Browser Smoke Test
-- ✅ Login with demo account → redirects to Dashboard
-- ✅ All 10 pages render correctly with proper styling
-- ✅ 0 console errors
+- Login with demo account redirects to Dashboard
+- All 10 pages render correctly with proper styling
+- 0 console errors
 
 ---
 
-## 🚀 New Features Added
+## New Features Added
 
 ### 1. Employee Profile
 Trang hồ sơ chi tiết tại `/employees/[id]`, hiển thị:

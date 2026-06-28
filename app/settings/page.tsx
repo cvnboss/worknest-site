@@ -64,6 +64,18 @@ const ToggleSwitch = ({ checked, onChange, testId, label }: { checked: boolean; 
   );
 };
 
+const getScrollParent = (element: HTMLElement) => {
+  let parent = element.parentElement;
+  while (parent) {
+    const overflowY = window.getComputedStyle(parent).overflowY;
+    if (overflowY === 'auto' || overflowY === 'scroll') {
+      return parent;
+    }
+    parent = parent.parentElement;
+  }
+  return document.scrollingElement as HTMLElement;
+};
+
 export default function SettingsPage() {
   const { user, token, updateUser, logout } = useAuth();
   const { addToast } = useToast();
@@ -156,7 +168,16 @@ export default function SettingsPage() {
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const scrollParent = getScrollParent(element);
+      const parentTop = scrollParent === document.scrollingElement ? 0 : scrollParent.getBoundingClientRect().top;
+      const menuCard = document.querySelector('[data-testid="settings-menu"]') as HTMLElement | null;
+      const targetLineTop = menuCard?.getBoundingClientRect().top ?? parentTop;
+      const sectionTop = element.getBoundingClientRect().top - parentTop + scrollParent.scrollTop;
+      const targetTop = sectionTop - (targetLineTop - parentTop);
+      scrollParent.scrollTo({
+        top: targetTop,
+        behavior: 'smooth'
+      });
       setActiveSection(id);
     }
   };
@@ -176,11 +197,13 @@ export default function SettingsPage() {
         
         {/* Left navigation sidebar */}
         <div 
+          data-testid="settings-menu"
           style={{ 
             width: '100%', 
             maxWidth: '240px', 
             position: 'sticky', 
-            top: '20px', 
+            top: 0, 
+            alignSelf: 'flex-start',
             display: 'flex', 
             flexDirection: 'column', 
             gap: '6px',
@@ -233,7 +256,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Right content forms */}
-        <div style={{ flex: 1, minWidth: '320px', display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+        <div style={{ flex: 1, minWidth: '320px', display: 'flex', flexDirection: 'column', gap: 'var(--space-6)', paddingBottom: '360px' }}>
           
           {/* Profile Section */}
           <div 
@@ -282,7 +305,7 @@ export default function SettingsPage() {
                 <div 
                   className="avatar avatar-xl" 
                   style={{ 
-                    background: getAvatarColor(`${user.firstName} ${user.lastName}`),
+                    background: user.avatar ? 'var(--bg-hover)' : getAvatarColor(`${user.firstName} ${user.lastName}`),
                     width: 56,
                     height: 56,
                     borderRadius: '50%',
@@ -292,7 +315,7 @@ export default function SettingsPage() {
                     color: '#fff',
                     fontWeight: 800,
                     fontSize: '20px',
-                    boxShadow: '0 0 12px rgba(79, 70, 229, 0.2)'
+                    boxShadow: 'var(--shadow-xs)'
                   }}
                 >
                   {user.avatar ? (

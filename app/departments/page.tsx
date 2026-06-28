@@ -9,12 +9,14 @@ import {
   AlertTriangle,
   Building2,
   Check,
+  CheckCircle2,
   Pencil,
   RefreshCw,
   Search,
   Trash2,
   UserCog,
   Users,
+  UserX,
   X
 } from 'lucide-react';
 
@@ -565,20 +567,32 @@ export default function DepartmentsPage() {
         ) : (
           <>
             <div className="department-stat-card">
-              <span className="department-stat-label">Total Departments</span>
-              <strong>{stats.total}</strong>
+              <div className="department-stat-copy">
+                <span className="department-stat-label">Total Departments</span>
+                <strong>{stats.total}</strong>
+              </div>
+              <span className="department-stat-icon"><Building2 size={20} /></span>
             </div>
             <div className="department-stat-card">
-              <span className="department-stat-label">Active Departments</span>
-              <strong>{stats.active}</strong>
+              <div className="department-stat-copy">
+                <span className="department-stat-label">Active Departments</span>
+                <strong>{stats.active}</strong>
+              </div>
+              <span className="department-stat-icon department-stat-icon-success"><CheckCircle2 size={20} /></span>
             </div>
             <div className="department-stat-card">
-              <span className="department-stat-label">Active Employees</span>
-              <strong>{stats.assignedEmployees}</strong>
+              <div className="department-stat-copy">
+                <span className="department-stat-label">Active Employees</span>
+                <strong>{stats.assignedEmployees}</strong>
+              </div>
+              <span className="department-stat-icon department-stat-icon-info"><Users size={20} /></span>
             </div>
             <div className="department-stat-card">
-              <span className="department-stat-label">Without Manager</span>
-              <strong>{stats.missingManagers}</strong>
+              <div className="department-stat-copy">
+                <span className="department-stat-label">Without Manager</span>
+                <strong>{stats.missingManagers}</strong>
+              </div>
+              <span className="department-stat-icon department-stat-icon-warning"><UserX size={20} /></span>
             </div>
           </>
         )}

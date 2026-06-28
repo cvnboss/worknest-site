@@ -39,16 +39,16 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         {toasts.map(toast => (
           <div key={toast.id} className={`toast toast-${toast.type}`} data-testid={`toast-${toast.type}`} role="alert">
             <div className="toast-icon">
-              {toast.type === 'success' && '✓'}
-              {toast.type === 'error' && '✕'}
-              {toast.type === 'warning' && '⚠'}
-              {toast.type === 'info' && 'ℹ'}
+              {toast.type === 'success' && 'OK'}
+              {toast.type === 'error' && '!'}
+              {toast.type === 'warning' && '!'}
+              {toast.type === 'info' && 'i'}
             </div>
             <div className="toast-content">
               <div className="toast-title">{toast.title}</div>
               {toast.message && <div className="toast-message">{toast.message}</div>}
             </div>
-            <button className="toast-close" onClick={() => removeToast(toast.id)} data-testid="toast-close" aria-label="Close notification">×</button>
+            <button className="toast-close" onClick={() => removeToast(toast.id)} data-testid="toast-close" aria-label="Close notification">x</button>
             <div className="toast-progress" />
           </div>
         ))}

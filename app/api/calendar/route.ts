@@ -112,7 +112,7 @@ export async function GET(request: Request) {
                     events.push({
                         id: `bd-${u.id}-${year}`,
                         type: 'birthday',
-                        title: `🎂 ${u.firstName}'s Work Anniversary`,
+                        title: `${u.firstName}'s Work Anniversary`,
                         date: bdayDateStr,
                         color: 'var(--warning)',
                         metadata: { employeeName: `${u.firstName} ${u.lastName}` }

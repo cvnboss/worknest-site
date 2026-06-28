@@ -1,5 +1,5 @@
 /* ===================================================
-   WorkNest — Types & Interfaces
+   WorkNest - Types & Interfaces
    =================================================== */
 
 export interface User {

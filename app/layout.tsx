@@ -20,7 +20,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'WorkNest — Company Internal Portal',
+  title: 'WorkNest - Company Internal Portal',
   description: 'WorkNest is a modern company internal portal for managing employees, leave requests, meeting rooms, tasks, and announcements.',
   keywords: ['worknest', 'internal portal', 'HR', 'employee management', 'task board'],
 };

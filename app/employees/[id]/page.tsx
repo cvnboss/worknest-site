@@ -196,7 +196,7 @@ export default function EmployeeProfilePage({ params }: { params: Promise<{ id: 
             </div>
             
             <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', fontWeight: 500, margin: 0 }}>
-              {emp.position} · {emp.department}
+              {emp.position} | {emp.department}
             </p>
           </div>
         </div>
@@ -498,7 +498,7 @@ export default function EmployeeProfilePage({ params }: { params: Promise<{ id: 
                       </span>
                     </div>
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                      <Calendar size={11} /> {l.startDate} → {l.endDate}
+                      <Calendar size={11} /> {l.startDate} - {l.endDate}
                     </div>
                   </div>
                 </div>

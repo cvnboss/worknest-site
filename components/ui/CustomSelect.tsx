@@ -18,6 +18,7 @@ interface CustomSelectProps {
   width?: string;
   height?: string;
   align?: 'left' | 'right';
+  onOpenChange?: (open: boolean) => void;
 }
 
 export default function CustomSelect({
@@ -29,10 +30,20 @@ export default function CustomSelect({
   minWidth = '160px',
   width,
   height = '40px',
-  align = 'left'
+  align = 'left',
+  onOpenChange
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const onOpenChangeRef = useRef(onOpenChange);
+
+  useEffect(() => {
+    onOpenChangeRef.current = onOpenChange;
+  }, [onOpenChange]);
+
+  useEffect(() => {
+    onOpenChangeRef.current?.(isOpen);
+  }, [isOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -66,7 +77,8 @@ export default function CustomSelect({
         position: 'relative', 
         display: outerWidth === '100%' ? 'block' : 'inline-block',
         width: outerWidth,
-        minWidth: width ? 'none' : minWidth
+        minWidth: width ? 'none' : minWidth,
+        zIndex: isOpen ? 1000 : 'auto'
       }}
     >
       {/* Hidden native select for E2E testing compatibility */}
@@ -157,7 +169,7 @@ export default function CustomSelect({
             border: '1px solid var(--border-default)',
             borderRadius: 'var(--radius-xl)',
             boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
-            zIndex: 100,
+            zIndex: 10000,
             overflowY: 'auto',
             overflowX: 'hidden',
             maxHeight: '240px',

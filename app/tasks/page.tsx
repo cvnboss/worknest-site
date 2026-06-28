@@ -62,6 +62,7 @@ export default function TasksPage() {
   const [searchInput, setSearchInput] = useState('');
   const [searchDebounced, setSearchDebounced] = useState('');
   const [employees, setEmployees] = useState<Array<{ id: string; firstName: string; lastName: string; avatar?: string }>>([]);
+  const [openStatusTaskId, setOpenStatusTaskId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: '', description: '', assignee: '', priority: 'medium', status: 'todo', dueDate: '', tags: '' });
   const hasProcessedUrlParam = useRef(false);
 
@@ -313,9 +314,11 @@ export default function TasksPage() {
           data-testid="kanban-board" 
           style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))', 
+            gridTemplateColumns: 'repeat(4, minmax(270px, 1fr))', 
             gap: 'var(--space-5)', 
-            alignItems: 'start'
+            alignItems: 'start',
+            overflowX: 'auto',
+            paddingBottom: 'var(--space-2)'
           }}
         >
           {columns.map(col => {
@@ -332,7 +335,8 @@ export default function TasksPage() {
                   display: 'flex', 
                   flexDirection: 'column', 
                   gap: 'var(--space-4)',
-                  minHeight: '600px',
+                  height: 'fit-content',
+                  minHeight: colTasks.length === 0 ? '220px' : 'auto',
                   boxShadow: 'var(--shadow-sm)',
                   transition: 'background-color 0.2s'
                 }}
@@ -359,7 +363,7 @@ export default function TasksPage() {
                 </div>
 
                 {/* Cards List */}
-                <div className="stagger-children" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', flex: 1 }}>
+                <div className="stagger-children" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
                   {colTasks.map(task => (
                     <div 
                       key={task.id} 
@@ -374,6 +378,9 @@ export default function TasksPage() {
                         backgroundColor: 'var(--bg-surface)',
                         boxShadow: 'var(--shadow-sm)',
                         transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                        position: 'relative',
+                        overflow: 'visible',
+                        zIndex: openStatusTaskId === task.id ? 1000 : 'auto',
                       }}
                       onMouseEnter={e => {
                         e.currentTarget.style.transform = 'translateY(-2px)';
@@ -472,6 +479,9 @@ export default function TasksPage() {
                             width="100%"
                             height="28px"
                             icon={null}
+                            onOpenChange={open => {
+                              setOpenStatusTaskId(current => open ? task.id : current === task.id ? null : current);
+                            }}
                             options={columns.map(c => ({ value: c.id, label: c.label }))}
                           />
                         </div>
@@ -491,6 +501,7 @@ export default function TasksPage() {
                       fontSize: 'var(--text-xs)',
                       gap: '4px',
                       backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                      minHeight: '132px',
                     }}>
                       <Clock size={16} style={{ opacity: 0.6 }} />
                       <span>No tasks in this list</span>

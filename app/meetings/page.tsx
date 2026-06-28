@@ -248,7 +248,7 @@ export default function MeetingsPage() {
                   </div>
                   <div style={{ display: 'flex', gap: 'var(--space-3)', color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>
                     <span className="flex items-center gap-1.5" style={{ fontWeight: 500 }}><Users size={14} /> Up to {room.capacity} seats</span>
-                    <span style={{ color: 'var(--text-muted)' }}>·</span>
+                    <span style={{ color: 'var(--text-muted)' }}>|</span>
                     <span className="flex items-center gap-1.5" style={{ fontWeight: 500 }}><MapPin size={14} /> {room.floor}</span>
                   </div>
                 </div>
@@ -355,7 +355,7 @@ export default function MeetingsPage() {
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
                             <span style={{ width: 8, height: 8, borderRadius: '50%', background: room.color, flexShrink: 0 }} />
                             <span style={{ fontWeight: 600, color: 'var(--text-primary)', flexShrink: 0 }}>{m.startTime} - {m.endTime}</span>
-                            <span style={{ color: 'var(--text-muted)', flexShrink: 0 }}>·</span>
+                            <span style={{ color: 'var(--text-muted)', flexShrink: 0 }}>|</span>
                             <span style={{ color: 'var(--text-secondary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }} title={`${m.title} (${m.organizerName})`}>
                               {m.title} <span style={{ color: 'var(--text-muted)', fontSize: '10px' }}>({m.organizerName})</span>
                             </span>
@@ -462,7 +462,7 @@ export default function MeetingsPage() {
                     fontWeight: 500
                   }}
                 >
-                  <MapPin size={11} /> {selectedRoom.floor} · Up to {selectedRoom.capacity} seats
+                  <MapPin size={11} /> {selectedRoom.floor} | Up to {selectedRoom.capacity} seats
                 </span>
               </div>
               <button 
