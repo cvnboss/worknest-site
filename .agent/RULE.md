@@ -10,7 +10,7 @@
 - Đặt tên rõ ràng: `PascalCase` cho types/components, `camelCase` cho functions/variables
 
 ### React / Next.js
-- Sử dụng Next.js 15 App Router (`app/` directory)
+- Sử dụng Next.js 16 App Router (`app/` directory)
 - Client components phải có `'use client'` directive
 - Không dùng `dangerouslySetInnerHTML` trừ khi thực sự cần thiết
 - Prefer CSS classes/modules over inline styles
@@ -29,6 +29,17 @@
 - Loading state phải reuse skeleton pattern của page chuẩn: cùng `height`, `border-radius`, `gap`, container behavior và timing
 - Không render alert/fallback/warning trong initial loading nếu dữ liệu chưa xác định lỗi thật; chỉ hiện sau khi `loading === false`
 - Không render card thật bọc skeleton nếu page chuẩn dùng skeleton block trực tiếp; skeleton phải mô phỏng layout cuối cùng mà không tạo ô màu/trắng lạ
+- In-page sidebar/menu navigation như Settings phải scroll content theo mốc cố định của menu container/card, không theo từng menu item. Khi click item, top của section active bên phải phải nằm cùng đường ngang với top của menu card/sidebar.
+- Với layout có scroll container trong AppShell, không dùng `window.scrollTo` mặc định. Phải tìm đúng scroll parent (`overflow-y: auto|scroll`) rồi tính offset theo container đó.
+- Kanban/list columns không được dùng `min-height` cố định lớn làm nền trống dôi ra khi ít card. Column phải `height: fit-content`; chỉ empty column mới có placeholder gọn, có chủ đích.
+- Kanban board nhiều lane phải giữ lane ổn định theo hàng ngang và dùng horizontal scroll khi thiếu width, không để lane tự wrap làm bố cục lệch giữa các cột.
+- Dropdown/menu nằm trong card/list item phải có stacking strategy rõ ràng: card đang mở menu được nâng `z-index`, dropdown cao hơn card, và parent không được clip dropdown bằng `overflow: hidden`.
+- Table header và data cell phải cùng text alignment theo từng cột. Nếu header left thì data cũng left; không được căn giữa/căn lệch riêng cho badge/text trong cell.
+- Badge text trong bảng và calendar/event chip phải đủ đọc ở desktop và mobile; không dùng font quá nhỏ chỉ để nhét nội dung vào ô.
+- Avatar người dùng phải lấy từ shared employee/user avatar data. Không random màu từng page, không tạo fallback khác nhau giữa Employees, Sidebar, Settings, Departments, Tasks.
+- Avatar SVG phải là flat people avatar faceless, nền sáng/nhẹ, tóc/thân hợp với tên/ngữ cảnh; không tạo khoảng trống tóc giống hói trừ khi cố ý là kiểu tóc hói.
+- Visible UI text, seed data và README không được chứa emoji, ký tự trang trí, mojibake (`ðŸ`, `âœ`, `Â·`, v.v.), smart punctuation không cần thiết, hoặc Unicode separator không ổn định cho E2E/screenshot.
+- Sau khi sửa seed data visible trên UI, phải reset runtime seed hoặc restart server trước khi verify bằng browser, vì in-memory store có thể vẫn giữ dữ liệu cũ.
 
 ## 2. API Design
 
@@ -81,3 +92,6 @@
 - Giữ nguyên `data-testid` attributes cho E2E testing
 - Trước khi deliver UI mới, phải verify visual consistency với page có pattern tương tự: desktop + mobile, không horizontal overflow, không text clipping, không control height mismatch
 - Phải kiểm tra initial loading bằng reload thật: không flash alert màu, không flash empty/fallback state, không có skeleton/card khác style với page chuẩn
+- Với bug visual/alignment/overlay, không được chỉ dựa vào type-check hoặc nhìn code. Phải verify bằng browser với DOM metric cụ thể hoặc screenshot: top/left/height delta, `elementFromPoint`, computed `z-index`, overflow, và trạng thái sau click/reload thật.
+- Với Settings-style menu alignment, metric pass là section active nằm cùng top line với menu card/sidebar (sai số visual nhỏ do border/shadow, thường <= 8px), không phải cùng top với menu item.
+- Với dropdown overlay trong card, metric pass là điểm nằm trong vùng dropdown trả về element thuộc dropdown qua `elementFromPoint`, không bị card bên dưới che.

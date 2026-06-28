@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import store from '@/lib/store';
 import { ensureSeeded } from '@/lib/seed';
 import { extractToken, verifyToken } from '@/lib/auth';
+import { getAuditActorFromPayload, recordAuditLog } from '@/lib/audit-log';
 
 export async function POST(request: Request) {
   try {
@@ -15,6 +16,17 @@ export async function POST(request: Request) {
 
     store.reset();
     ensureSeeded();
+    recordAuditLog({
+      actor: getAuditActorFromPayload(payload),
+      action: 'reset',
+      entityType: 'system',
+      entityId: 'seed',
+      entityLabel: 'Seed data',
+      summary: 'Reset seed data',
+      metadata: {
+        reset: true
+      }
+    });
 
     return NextResponse.json({
       success: true,

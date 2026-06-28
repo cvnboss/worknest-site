@@ -735,7 +735,7 @@ export default function DashboardPage() {
                       <span className="upcoming-meeting-time" style={{ fontSize: 'var(--text-sm)', fontWeight: 600, minWidth: 45, color: 'var(--primary-600)' }}>{m.startTime}</span>
                       <div className="upcoming-meeting-info">
                         <div className="upcoming-meeting-title" style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{m.title}</div>
-                        <div className="upcoming-meeting-room" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', marginTop: 2 }}>{m.roomName} · {m.date}</div>
+                        <div className="upcoming-meeting-room" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', marginTop: 2 }}>{m.roomName} | {m.date}</div>
                       </div>
                     </div>
                   )) : <div className="empty-state" style={{ padding: 'var(--space-6)' }}><div className="empty-state-icon"><Calendar size={32} className="text-muted" /></div><div className="empty-state-title">No upcoming meetings</div></div>}

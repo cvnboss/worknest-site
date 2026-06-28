@@ -4,6 +4,7 @@ import { extractToken, verifyToken } from '@/lib/auth';
 import { ensureSeeded } from '@/lib/seed';
 import { COLLECTIONS, DEPARTMENT_STATUS, MAX_LENGTHS } from '@/lib/constants';
 import { isJwtError, normalizeDepartmentName } from '@/lib/api-utils';
+import { getAuditActorFromPayload, recordAuditLog } from '@/lib/audit-log';
 import type { Department, DepartmentStatus, DepartmentWithStats, LeaveRequest, Task, User } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -166,6 +167,19 @@ export async function POST(request: Request) {
       createdAt: now,
       updatedAt: now,
     }) as Department;
+
+    recordAuditLog({
+      actor: getAuditActorFromPayload(payload),
+      action: 'create',
+      entityType: 'department',
+      entityId: department.id,
+      entityLabel: department.name,
+      summary: `Created department ${department.name}`,
+      metadata: {
+        status: department.status,
+        managerName: department.managerName || null
+      }
+    });
 
     return NextResponse.json({ success: true, data: department, message: 'Department created' }, { status: 201 });
   } catch (error) {

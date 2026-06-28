@@ -4,6 +4,7 @@ import { extractToken, verifyToken } from '@/lib/auth';
 import { ensureSeeded } from '@/lib/seed';
 import { COLLECTIONS, DEPARTMENT_STATUS, MAX_LENGTHS } from '@/lib/constants';
 import { isJwtError, normalizeDepartmentName, pickFields } from '@/lib/api-utils';
+import { getAuditActorFromPayload, recordAuditLog } from '@/lib/audit-log';
 import type { Department, DepartmentStatus, DepartmentWithStats, Employee, LeaveRequest, Task, User } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -194,6 +195,26 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         });
     }
 
+    const changedFields = Object.keys(departmentUpdates).filter(field => field !== 'managerName');
+    const auditAction = department.status !== 'inactive' && updated.status === 'inactive' ? 'deactivate' : 'update';
+    recordAuditLog({
+      actor: getAuditActorFromPayload(payload),
+      action: auditAction,
+      entityType: 'department',
+      entityId: updated.id,
+      entityLabel: updated.name,
+      summary: auditAction === 'deactivate'
+        ? `Deactivated department ${updated.name}`
+        : `Updated department ${updated.name}`,
+      metadata: {
+        previousName: previousName !== updated.name ? previousName : null,
+        currentName: updated.name,
+        previousStatus: department.status,
+        currentStatus: updated.status,
+        changedFieldCount: changedFields.length
+      }
+    });
+
     return NextResponse.json({ success: true, data: updated, message: 'Department updated' });
   } catch (error) {
     console.error('[departments/id PUT] error:', error);
@@ -226,6 +247,21 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       status: 'inactive',
       updatedAt: new Date().toISOString(),
     }) as Department | undefined;
+
+    if (updated) {
+      recordAuditLog({
+        actor: getAuditActorFromPayload(payload),
+        action: 'deactivate',
+        entityType: 'department',
+        entityId: updated.id,
+        entityLabel: updated.name,
+        summary: `Deactivated department ${updated.name}`,
+        metadata: {
+          previousStatus: department.status,
+          currentStatus: updated.status
+        }
+      });
+    }
 
     return NextResponse.json({ success: true, data: updated, message: 'Department deactivated' });
   } catch (error) {

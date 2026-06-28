@@ -1,5 +1,5 @@
 /* ===================================================
-   WorkNest — Types & Interfaces
+   WorkNest - Types & Interfaces
    =================================================== */
 
 export interface User {
@@ -144,6 +144,41 @@ export interface Notification {
   timestamp: string;
   link: string;
   actorName: string;
+}
+
+export type AuditAction =
+  | 'create'
+  | 'update'
+  | 'delete'
+  | 'deactivate'
+  | 'approve'
+  | 'reject'
+  | 'assign'
+  | 'reset';
+
+export type AuditEntityType =
+  | 'department'
+  | 'department_members'
+  | 'employee'
+  | 'leave'
+  | 'meeting'
+  | 'task'
+  | 'announcement'
+  | 'notification'
+  | 'system';
+
+export interface AuditLog {
+  id: string;
+  actorId: string;
+  actorName: string;
+  actorRole: 'employee' | 'manager' | 'admin';
+  action: AuditAction;
+  entityType: AuditEntityType;
+  entityId?: string;
+  entityLabel?: string;
+  summary: string;
+  metadata?: Record<string, string | number | boolean | null>;
+  createdAt: string;
 }
 
 export interface CalendarEvent {

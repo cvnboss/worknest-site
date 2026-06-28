@@ -15,6 +15,7 @@ export function ensureSeeded() {
   seedTasks();
   seedAnnouncements();
   seedNotifications();
+  seedAuditLogs();
 
   store.setInitialized();
 }
@@ -191,7 +192,7 @@ function seedAnnouncements() {
       id: 'a1', title: 'Welcome to WorkNest!', content: 'We are excited to launch our new internal portal. WorkNest will be your one-stop destination for managing tasks, leave requests, meeting rooms, and staying updated with company news. Please explore all the features and don\'t hesitate to provide feedback!',
       author: 'u1', authorName: 'Alex Admin', category: 'general', isPinned: true,
       comments: [
-        { id: 'c1', content: 'This looks amazing! Great work team! 🎉', author: 'u3', authorName: 'John Smith', createdAt: '2026-06-18T10:30:00Z' },
+        { id: 'c1', content: 'This looks amazing. Great work team!', author: 'u3', authorName: 'John Smith', createdAt: '2026-06-18T10:30:00Z' },
         { id: 'c2', content: 'Love the new design. Very intuitive!', author: 'u4', authorName: 'Jane Doe', createdAt: '2026-06-18T11:00:00Z' },
         { id: 'c3', content: 'Can we get a mobile app version too?', author: 'u5', authorName: 'Bob Wilson', createdAt: '2026-06-18T14:00:00Z' },
       ],
@@ -206,10 +207,10 @@ function seedAnnouncements() {
       createdAt: '2026-06-17T14:00:00Z', updatedAt: '2026-06-17T14:00:00Z'
     },
     {
-      id: 'a3', title: 'Summer Team Building Event 🏖️', content: 'Join us for our annual summer team building event on July 5th! We\'ve planned exciting activities including beach games, BBQ, and a sunset boat tour. Details and sign-up form will be shared via email. Mark your calendars!',
+      id: 'a3', title: 'Summer Team Building Event', content: 'Join us for our annual summer team building event on July 5th. We\'ve planned activities including beach games, BBQ, and a sunset boat tour. Details and sign-up form will be shared via email. Mark your calendars.',
       author: 'u8', authorName: 'Emily Davis', category: 'event', isPinned: false,
       comments: [
-        { id: 'c5', content: 'Count me in! 🙌', author: 'u3', authorName: 'John Smith', createdAt: '2026-06-16T10:00:00Z' },
+        { id: 'c5', content: 'Count me in.', author: 'u3', authorName: 'John Smith', createdAt: '2026-06-16T10:00:00Z' },
         { id: 'c6', content: 'Can we bring family members?', author: 'u7', authorName: 'Mike Brown', createdAt: '2026-06-16T11:30:00Z' },
       ],
       createdAt: '2026-06-16T09:00:00Z', updatedAt: '2026-06-16T09:00:00Z'
@@ -232,7 +233,7 @@ function seedAnnouncements() {
       id: 'a6', title: 'Q2 Engineering All-Hands Recap', content: 'For those who missed the Engineering All-Hands meeting, here are the key highlights: We shipped 23 features this quarter, reduced bug count by 40%, and onboarded 3 new team members. The recording is available on the shared drive. Great job, engineering team!',
       author: 'u2', authorName: 'Maya Manager', category: 'general', isPinned: false,
       comments: [
-        { id: 'c8', content: 'Proud of what we accomplished! 💪', author: 'u9', authorName: 'David Lee', createdAt: '2026-06-13T11:00:00Z' },
+        { id: 'c8', content: 'Proud of what we accomplished.', author: 'u9', authorName: 'David Lee', createdAt: '2026-06-13T11:00:00Z' },
         { id: 'c9', content: 'Looking forward to an even better Q3!', author: 'u6', authorName: 'Sarah Johnson', createdAt: '2026-06-13T12:00:00Z' },
       ],
       createdAt: '2026-06-13T09:00:00Z', updatedAt: '2026-06-13T09:00:00Z'
@@ -252,4 +253,8 @@ function seedNotifications() {
   ];
 
   notifications.forEach(n => store.create('notifications', n));
+}
+
+function seedAuditLogs() {
+  store.getCollection(COLLECTIONS.AUDIT_LOGS);
 }

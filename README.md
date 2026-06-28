@@ -1,198 +1,320 @@
-# WorkNest — Company Internal Portal (Cổng Thông Tin Nội Bộ Doanh Nghiệp)
+# WorkNest - Company Internal Portal
 
-**WorkNest** là một cổng thông tin nội bộ doanh nghiệp (company internal portal) được xây dựng hoàn chỉnh, đóng vai trò là một môi trường giả lập (testing target) lý tưởng phục vụ cho việc kiểm thử tự động (automated E2E testing) bằng Playwright sử dụng Page Object Model (POM). 
+WorkNest is a company internal portal built as a realistic target application for automated E2E testing with Playwright and Page Object Model patterns.
 
-Dự án sở hữu giao diện chuyên nghiệp, hiện đại, hỗ trợ **3 nhóm vai trò người dùng (Admin, Manager, Employee)**, đi kèm với **10 trang chức năng**, **23 API endpoints** và hệ thống quản lý dữ liệu in-memory đồng bộ.
+The app currently includes role-based authentication, employee management, department management, leave approval, meeting room booking, task board workflows, announcements, notifications, calendar views, dashboard analytics, admin audit logs, and user settings.
 
----
+## Current Status Recap
 
-## ✨ Các Tính Năng Chính (Key Features)
+- Department Management is implemented with list, create, edit, deactivate, member assignment, stats, active status, and API-backed employee department options.
+- Audit Logs is implemented as an admin-only activity view with search, action/entity filters, pagination, and logging for seed reset, department changes, employee changes, and leave approval decisions.
+- UI consistency has been tightened across Dashboard, Employees, Departments, Leave Management, Tasks, Calendar, and Settings.
+- Sidebar navigation has been redesigned with Core, People, Work, Admin, and Account groups, calmer active states, stable collapsed icon navigation, and the existing admin-only Audit Logs visibility.
+- Employee avatars are deterministic flat SVG people avatars, synced across Employees, Departments, Tasks, Sidebar, and Settings.
+- Task Board layout now uses compact fit-content Kanban lanes, stable horizontal columns, and status dropdown layering that stays above cards below it.
+- Department loading states now match the shared dashboard/employee skeleton style.
+- Leave Management includes aligned My Requests and Team Requests tables, larger readable badges, colored Type and Status values, and filters for status and type.
+- Settings uses the same avatar source as Employees and aligns selected section content to the top line of the Settings menu card.
+- Runtime seed data has been cleaned of emoji/decorative text so visible UI is more stable for screenshots and E2E assertions.
+- Netlify deployment configuration is present in `netlify.toml` with Node 22 and `@netlify/plugin-nextjs`.
 
-### 1. 🔐 Xác Thực & Phân Quyền (Authentication & Authorization)
-* Đăng ký (Register) và Đăng nhập (Login) bằng JWT (sử dụng thư viện `jose`).
-* Phân quyền chi tiết dựa trên vai trò (Role-based access control - RBAC) cho 3 nhóm tài khoản: **Admin**, **Manager**, và **Employee**.
-* Bảo vệ toàn bộ các route nhạy cảm với `AppShell` Component và JWT Validation.
+## Feature Overview
 
-### 2. 📊 Bảng Điều Khiển & Phân Tích (Dashboard & Analytics)
-* Sử dụng **Chart.js** & **react-chartjs-2** hiển thị các thông tin phân tích trực quan:
-  * **Task Distribution**: Phân bố công việc (Doughnut chart).
-  * **Leave Trends**: Biểu đồ xu hướng nghỉ phép trong 6 tháng gần nhất (Line chart).
-  * **Tasks by Department**: Thống kê công việc theo phòng ban (Horizontal Bar chart).
-  * **Headcount by Department**: Cơ cấu nhân sự theo phòng ban (Doughnut chart).
+### Authentication and Authorization
 
-### 3. 👥 Quản Lý Nhân Viên (Employee Directory & Profiles)
-* Danh sách nhân viên trực quan hỗ trợ lọc theo phòng ban (Department) và vai trò (Role).
-* Trang chi tiết hồ sơ nhân viên (`/employees/[id]`): Hiển thị thông tin cá nhân, chỉ số hiệu suất (Performance metrics), danh sách các tác vụ được giao (Assigned Tasks) và lịch sử nghỉ phép (Leave History).
+- Register and login with JWT using `jose`.
+- Role-based access control for Admin, Manager, and Employee.
+- Protected application shell with token validation and current-user context.
 
-### 4. 📅 Lịch Hợp Nhất (Unified Calendar)
-* Lịch làm việc tùy biến xây dựng hoàn toàn bằng **CSS Grid** (không sử dụng thư viện ngoài).
-* Tổng hợp toàn bộ các sự kiện quan trọng trong tháng: Lịch họp (Meetings), Hạn chót công việc (Task Deadlines), Lịch nghỉ phép (Leaves), và Sinh nhật/Kỷ niệm ngày vào làm của đồng nghiệp (Work Anniversaries / Birthdays).
-* Panel chi tiết bên cạnh hiển thị nhanh danh sách sự kiện khi chọn một ngày bất kỳ trên lịch.
+### Dashboard and Analytics
 
-### 5. 📋 Bảng Công Việc (Kanban Task Board)
-* Quản lý công việc với giao diện dạng bảng Kanban gồm 4 trạng thái: **To Do**, **In Progress**, **In Review**, và **Done**.
-* Cho phép tạo mới, chỉnh sửa, xóa và thay đổi trạng thái/phân công công việc (Task Assignment).
+- Summary cards for employees, leave, tasks, and departments.
+- Chart.js dashboards for task distribution, leave trends, tasks by department, and headcount by department.
+- Recent activity and upcoming meetings/widgets for quick review.
 
-### 6. 🏖️ Quản Lý Nghỉ Phép (Leave Management)
-* Nhân viên có thể tạo yêu cầu nghỉ phép (Leave Request) với các thông tin: Loại nghỉ phép (Casual, Sick, Annual), thời gian và lý do.
-* Manager và Admin có quyền phê duyệt (Approve) hoặc từ chối (Reject) trực tiếp các yêu cầu nghỉ phép của nhân sự cấp dưới.
+### Employee Directory and Profiles
 
-### 7. 🤝 Đặt Phòng Họp (Meeting Room Booking)
-* Quản lý các phòng họp của công ty với đầy đủ thông tin tiện ích đi kèm (Projector, Whiteboard, Video Conference, v.v.).
-* Đăng ký họp, tự động kiểm tra xung đột thời gian (Conflict prevention) giữa các lịch đặt phòng họp.
+- Employee list with search, department filter, role filter, create, edit, and delete flows.
+- Employee profile pages at `/employees/[id]`.
+- Profile metrics include task counts, completed tasks, in-progress work, and leave days.
+- Avatars are deterministic SVG assets generated from employee identity data.
 
-### 8. 📢 Bảng Tin Nội Bộ (Announcements)
-* Đăng tải các thông báo nội bộ của công ty.
-* Hỗ trợ phần bình luận (Comments) dưới mỗi thông báo giúp tăng tương tác giữa nhân viên.
+### Department Management
 
-### 9. 🔔 Hệ Thống Thông Báo (Notification Center)
-* Hệ thống thông báo trực tiếp (Dropdown panel từ icon quả chuông ở Header).
-* Tự động tạo thông báo khi có các sự kiện: Được giao task mới, phòng họp được đặt, đơn nghỉ phép được phê duyệt/tối từ chối, có thông báo mới.
-* Badge đếm số lượng thông báo chưa đọc, hỗ trợ đánh dấu đã đọc (`mark as read`).
+- Dedicated `/departments` page.
+- Department stats: total departments, active departments, open tasks, and departments without manager.
+- Department CRUD endpoints and member assignment endpoint.
+- Safe fallback view if Department API data is unavailable.
+- Employee forms and filters use active departments from the Department API with fallback options.
 
-### 10. ⚙️ Cài Đặt (System Settings)
-* Cho phép thay đổi thông tin cá nhân của người dùng hiện tại.
-* Cấu hình hiển thị và cài đặt các quyền cơ bản.
+### Leave Management
 
----
+- Employees can submit leave requests.
+- Managers and Admins can review team requests.
+- Status and type filters are available.
+- Team request status/type values use readable, distinct colors.
 
-## 🛠️ Công Nghệ Sử Dụng (Tech Stack)
+### Meeting Room Booking
 
-* **Framework**: Next.js 15 (sử dụng `/app` App Router)
-* **Ngôn ngữ**: TypeScript
-* **Styling**: Vanilla CSS (tối ưu hóa hiệu năng, giao diện Glassmorphic hiện đại, hỗ trợ Responsive)
-* **Xác thực**: JWT (`jose`), Cookies
-* **Thư viện biểu đồ**: Chart.js & React-Chartjs-2
-* **Database**: In-memory database store (`lib/store.ts`) - Dữ liệu sẽ được reset lại khi khởi động lại server hoặc gọi API seed dữ liệu, cực kỳ thuận tiện cho quá trình chạy E2E tests tự động.
+- Meeting room list with capacity, floor, amenities, and availability timeline.
+- Booking drawer with date/time controls.
+- Conflict prevention for overlapping bookings.
 
----
+### Task Board
 
-## 👥 Tài Khoản Demo (Demo Accounts)
+- Kanban board with To Do, In Progress, Review, and Done lanes.
+- Create, edit, delete, assign, prioritize, tag, and update task status.
+- Status dropdown stays interactive above adjacent cards.
+- Columns remain compact when a lane has fewer tasks.
 
-Hệ thống có sẵn các tài khoản demo sau đây để kiểm thử:
+### Calendar
 
-| Vai trò (Role) | Email | Mật khẩu (Password) | Quyền hạn |
+- Unified calendar for meetings, task deadlines, leave entries, and work anniversaries.
+- Month grid built with CSS Grid.
+- Day detail panel for selected date events.
+
+### Announcements and Notifications
+
+- Announcement feed with categories, pinned posts, comments, edit, and delete flows.
+- Notification center from the header bell.
+- Mark-as-read support through API.
+
+### Audit Logs
+
+- Admin-only `/audit-logs` page for reviewing system activity.
+- Search, action filter, entity type filter, and paginated table view.
+- Audit records capture actor, action, entity type, entity id, summary, timestamp, and sanitized metadata.
+- Covered actions include seed reset, department create/update/deactivate/member assignment, employee create/update/delete, and leave approve/reject decisions.
+
+### Settings
+
+- Profile update form.
+- Password update form.
+- Notification preferences.
+- Account summary.
+- Admin system reset action for restoring seeded E2E data.
+
+## Tech Stack
+
+- Framework: Next.js 16.2.9 with App Router and Turbopack dev server.
+- Runtime UI: React 19.2.7 and React DOM 19.2.7.
+- Language: TypeScript 6.0.3.
+- Styling: Vanilla CSS with shared design tokens in `app/globals.css`.
+- Icons: `lucide-react`.
+- Charts: Chart.js and `react-chartjs-2`.
+- Auth: JWT with `jose`.
+- Data store: In-memory application store in `lib/store.ts`.
+- Deployment: Netlify with `@netlify/plugin-nextjs`.
+
+## Demo Accounts
+
+| Role | Email | Password | Notes |
 | :--- | :--- | :--- | :--- |
-| **Admin** | `admin@worknest.com` | `admin123` | Toàn quyền cấu hình hệ thống, quản lý nhân sự, duyệt phép, tạo phòng họp. |
-| **Manager** | `manager@worknest.com` | `manager123` | Quản lý team, phân công công việc, duyệt phép cho nhân viên. |
-| **Employee** | `john@worknest.com` | `password123` | Xem thông tin cá nhân, cập nhật công việc, gửi yêu cầu nghỉ phép. |
+| Admin | `admin@worknest.com` | `admin123` | Full system access, seed reset, employees, departments, leave approvals, meetings. |
+| Manager | `manager@worknest.com` | `manager123` | Team management, task assignment, leave approval for team members. |
+| Employee | `john@worknest.com` | `password123` | Personal profile, assigned tasks, leave requests, calendar, announcements. |
 
----
+## Getting Started
 
-## 🚀 Hướng Dẫn Cài Đặt & Chạy Dự Án (Getting Started)
+Install dependencies:
 
-### 1. Cài đặt các thư viện phụ thuộc (Dependencies)
 ```bash
 npm install
 ```
 
-### 2. Chạy môi trường Phát triển (Development)
+Start development server:
+
 ```bash
 npm run dev
 ```
-Truy cập ứng dụng tại địa chỉ mặc định: [http://localhost:3000](http://localhost:3000)
 
-### 3. Build sản phẩm deploy (Production Build)
+Default local URL:
+
+```text
+http://localhost:3000
+```
+
+Run type-check:
+
+```bash
+npm run type-check
+```
+
+Run production build:
+
 ```bash
 npm run build
+```
+
+Start production server after build:
+
+```bash
 npm run start
 ```
 
-### 4. Khởi tạo / Reset lại dữ liệu mẫu (Seed/Reset Data)
-Ứng dụng sử dụng in-memory database. Nếu bạn muốn reset toàn bộ dữ liệu về trạng thái mẫu ban đầu (phục vụ cho mỗi lần chạy test mới), bạn có thể gửi một yêu cầu `POST` tới:
-`http://localhost:3000/api/seed`
+## Seed and E2E Data Reset
 
-Hoặc đăng nhập bằng tài khoản **Admin** và ấn vào nút reset hệ thống trong trang Cấu hình/Quản trị.
+WorkNest intentionally uses an in-memory store so E2E test runs can start from a known state.
 
----
+Reset data through the protected seed endpoint:
 
-## 📂 Cấu Trúc Thư Mục Chính (Project Structure)
-
+```http
+POST /api/seed
+Authorization: Bearer <admin-token>
 ```
+
+The same reset is available from Settings for Admin users through the "Reset Application State" action.
+
+Important notes:
+
+- The seed endpoint requires Admin authentication.
+- Resetting seed data restores users, departments, leave requests, meeting rooms, meetings, tasks, announcements, and notifications.
+- The reset action clears runtime changes and is intended for test setup or manual QA.
+
+## Netlify Deployment
+
+Netlify configuration is stored in `netlify.toml`.
+
+```toml
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+```
+
+Deployment checklist:
+
+- Use Node 22.
+- Install dependencies with `npm install` or Netlify's default npm install step.
+- Build command is `npm run build`.
+- Publish directory is `.next`.
+- Keep `@netlify/plugin-nextjs` installed.
+
+## Project Structure
+
+```text
 worknest-site/
-├── app/                  # Next.js App Router (Pages & API routes)
-│   ├── api/              # 23 API endpoints phục vụ cho FE và E2E test
-│   ├── calendar/         # Trang Lịch biểu dùng CSS Grid
-│   ├── employees/        # Danh sách nhân viên & Chi tiết hồ sơ nhân sự
-│   ├── leave/            # Quản lý & phê duyệt nghỉ phép
-│   ├── tasks/            # Bảng công việc Kanban
-│   ├── meetings/         # Đặt phòng họp
-│   ├── announcements/    # Bảng tin & bình luận nội bộ
-│   └── globals.css       # Design System & các class CSS tùy biến
-├── components/           # Các reusable React components (Layout, UI, Forms)
-├── lib/                  # Nơi lưu trữ logic cốt lõi
-│   ├── store.ts          # In-memory database chính cho toàn portal
-│   ├── seed.ts           # Dữ liệu khởi tạo mặc định (15 nhân sự, 20 task,...)
-│   ├── auth.ts           # JWT Helper utilities
-│   └── auth-context.tsx  # Quản lý State đăng nhập & Phân quyền
-└── docs/                 # Tài liệu mô tả tính năng & lộ trình phát triển
+|-- app/
+|   |-- api/
+|   |-- announcements/
+|   |-- audit-logs/
+|   |-- calendar/
+|   |-- departments/
+|   |-- employees/
+|   |-- leave/
+|   |-- login/
+|   |-- meetings/
+|   |-- register/
+|   |-- settings/
+|   |-- tasks/
+|   |-- globals.css
+|   `-- layout.tsx
+|-- components/
+|   |-- layout/
+|   `-- ui/
+|-- lib/
+|   |-- api-utils.ts
+|   |-- audit-log.ts
+|   |-- auth-context.tsx
+|   |-- auth.ts
+|   |-- constants.ts
+|   |-- seed.ts
+|   |-- store.ts
+|   |-- toast-context.tsx
+|   |-- types.ts
+|   `-- utils.ts
+|-- docs/
+|-- .agent/
+|-- netlify.toml
+|-- package.json
+`-- tsconfig.json
 ```
 
----
+## API Surface
 
-## 📡 API Endpoints (23 endpoints)
+There are currently 28 route handler files under `app/api`.
 
-| Nhóm chức năng | Endpoint | Phương thức | Chi tiết |
+| Group | Endpoint | Methods | Purpose |
 | :--- | :--- | :--- | :--- |
-| **Auth** | `/api/auth/login` | `POST` | Đăng nhập tài khoản |
-| | `/api/auth/register` | `POST` | Đăng ký tài khoản mới |
-| | `/api/auth/me` | `GET` | Lấy thông tin user hiện tại qua JWT |
-| **Employees** | `/api/employees` | `GET`, `POST` | Lấy danh sách hoặc thêm mới nhân sự |
-| | `/api/employees/[id]` | `GET`, `PUT`, `DELETE` | Chi tiết, cập nhật hoặc xóa nhân viên |
-| | `/api/employees/[id]/profile` | `GET` | Lấy dữ liệu profile đầy đủ kèm thống kê |
-| **Leave** | `/api/leave` | `GET`, `POST` | Lấy danh sách hoặc tạo phép nghỉ |
-| | `/api/leave/[id]` | `GET`, `PUT`, `DELETE` | Chi tiết, cập nhật hoặc xóa đơn xin phép |
-| | `/api/leave/[id]/approve` | `PUT` | Phê duyệt hoặc từ chối đơn xin phép nghỉ |
-| **Meetings** | `/api/meetings` | `GET`, `POST` | Xem danh sách hoặc đặt phòng họp |
-| | `/api/meetings/[id]` | `GET`, `PUT`, `DELETE` | Chi tiết, chỉnh sửa hoặc hủy lịch họp |
-| | `/api/meetings/rooms` | `GET` | Xem danh sách phòng họp khả dụng |
-| **Tasks** | `/api/tasks` | `GET`, `POST` | Lấy danh sách tasks hoặc tạo task mới |
-| | `/api/tasks/[id]` | `GET`, `PUT`, `DELETE` | Xem chi tiết, cập nhật trạng thái hoặc xóa task |
-| **Announcements** | `/api/announcements` | `GET`, `POST` | Xem bản tin hoặc đăng thông báo mới |
-| | `/api/announcements/[id]` | `GET`, `PUT`, `DELETE` | Chi tiết, chỉnh sửa hoặc xóa thông báo |
-| | `/api/announcements/[id]/comments` | `POST` | Bình luận vào bài viết thông báo |
-| **Users** | `/api/users/[id]` | `GET`, `PUT` | Xem chi tiết hoặc cập nhật cấu hình cá nhân |
-| **Dashboard** | `/api/dashboard/stats` | `GET` | Lấy các con số thống kê tổng quan (Dashboard card stats) |
-| | `/api/dashboard/charts` | `GET` | Lấy dữ liệu cho các biểu đồ phân tích |
-| **Notifications** | `/api/notifications` | `GET` | Danh sách thông báo cá nhân |
-| | `/api/notifications/read` | `PUT` | Đánh dấu các thông báo đã đọc |
-| **Calendar** | `/api/calendar` | `GET` | Tổng hợp mọi sự kiện trong tháng |
-| **Seed** | `/api/seed` | `POST` | Xóa và tạo mới lại toàn bộ dữ liệu mẫu (⚠️ yêu cầu Admin auth) |
+| Auth | `/api/auth/login` | POST | Login and issue token. |
+| Auth | `/api/auth/register` | POST | Register a new user. |
+| Auth | `/api/auth/me` | GET | Return current user from token. |
+| Audit Logs | `/api/audit-logs` | GET | List sanitized admin-only audit log entries. |
+| Employees | `/api/employees` | GET, POST | List or create employees. |
+| Employees | `/api/employees/[id]` | GET, PUT, DELETE | Read, update, or delete an employee. |
+| Employees | `/api/employees/[id]/profile` | GET | Read employee profile data and metrics. |
+| Departments | `/api/departments` | GET, POST | List or create departments. |
+| Departments | `/api/departments/[id]` | GET, PUT, DELETE | Read, update, or deactivate a department. |
+| Departments | `/api/departments/[id]/members` | PUT | Assign members to a department. |
+| Leave | `/api/leave` | GET, POST | List or create leave requests. |
+| Leave | `/api/leave/[id]` | GET, PUT, DELETE | Read, update, or delete leave requests. |
+| Leave | `/api/leave/[id]/approve` | PUT | Approve or reject leave requests. |
+| Meetings | `/api/meetings` | GET, POST | List or create meetings. |
+| Meetings | `/api/meetings/[id]` | GET, PUT, DELETE | Read, update, or cancel meetings. |
+| Meetings | `/api/meetings/rooms` | GET | List available meeting rooms. |
+| Tasks | `/api/tasks` | GET, POST | List or create tasks. |
+| Tasks | `/api/tasks/[id]` | GET, PUT, DELETE | Read, update, or delete tasks. |
+| Announcements | `/api/announcements` | GET, POST | List or create announcements. |
+| Announcements | `/api/announcements/[id]` | GET, PUT, DELETE | Read, update, or delete announcements. |
+| Announcements | `/api/announcements/[id]/comments` | POST | Add comments to announcements. |
+| Users | `/api/users/[id]` | GET, PUT | Read or update user settings. |
+| Dashboard | `/api/dashboard/stats` | GET | Read dashboard summary stats. |
+| Dashboard | `/api/dashboard/charts` | GET | Read dashboard chart data. |
+| Notifications | `/api/notifications` | GET | Read user notifications. |
+| Notifications | `/api/notifications/read` | PUT | Mark notifications as read. |
+| Calendar | `/api/calendar` | GET | Read unified calendar events. |
+| Seed | `/api/seed` | POST | Reset in-memory data to seeded state. |
 
----
+## Security Notes
 
-## 🔒 Bảo Mật (Security)
+- API routes, except auth entry points, verify JWT tokens.
+- Protected write routes whitelist accepted fields.
+- Role escalation through user update APIs is blocked.
+- Audit logs are restricted to Admin users and sanitize sensitive metadata before storage.
+- Leave self-approval is blocked for Manager and Admin users.
+- Seed reset requires Admin authentication.
+- JWT errors return 401 while unexpected server errors return 500.
 
-Dự án đã được audit và vá các lỗ hổng bảo mật:
+## UI Consistency Rules
 
-- **JWT Secret**: Đọc từ biến môi trường `JWT_SECRET` (có fallback cho demo)
-- **Field Whitelisting**: Tất cả PUT endpoints sử dụng `pickFields()` — chống mass assignment
-- **Self-Approve Prevention**: Manager/Admin không thể tự phê duyệt đơn nghỉ phép của mình
-- **Role Escalation Block**: Không thể tự nâng quyền (role) qua API
-- **Seed Protection**: Endpoint `/api/seed` yêu cầu xác thực Admin
-- **Error Discrimination**: Phân biệt lỗi JWT (401) vs lỗi server (500)
+The project keeps a strict UI consistency bar because it is used for visual and E2E testing.
 
-### Cấu hình môi trường (Environment Variables)
-Tạo file `.env.local` dựa trên `.env.example`:
-```bash
-cp .env.example .env.local
-```
-```env
-JWT_SECRET=your-secret-key-here
-```
+- Search controls, filters, refresh buttons, and table toolbars should match across pages.
+- Sidebar navigation should keep routes grouped for scanability, preserve collapsed icon access, and keep admin-only entries hidden for non-admin users.
+- Skeleton loading should use shared dashboard/employee patterns.
+- Tables should keep header and cell alignment consistent.
+- Cards should use the same hover elevation language across Dashboard, Departments, and Leave Management.
+- Avatars should come from the shared employee avatar data, not page-local random colors.
+- Visible text should avoid decorative symbols, emoji, and unstable Unicode separators.
 
----
+## Verification Recap
 
-## 🤖 Agent Workflow (Tái Sử Dụng)
+Recent checks completed during stabilization:
 
-Dự án có sẵn hệ thống agent configs để tái sử dụng cho audit & nâng cấp:
+- `npm run type-check`
+- `npm run build`
+- Browser smoke checks for Dashboard, Employees, Departments, Leave, Meetings, Calendar, Tasks, Announcements, and Settings.
+- Browser desktop checks for Audit Logs admin visibility, employee hidden navigation, stable `nav-audit-logs` selector, and collapsed sidebar dimensions.
+- Browser alignment checks for Settings menu-to-content positioning.
+- Browser interaction checks for Task Board status dropdown layering.
 
-```
+## Agent Workflow
+
+Agent configuration lives in `.agent`.
+
+```text
 .agent/
-├── master_agent.md           # Điều phối viên dự án
-├── RULE.md                   # Quy tắc chung (TypeScript, API, CSS)
-└── sub_agents/
-    ├── frontend-engineer/    # UI/UX, CSS, Components, Accessibility
-    ├── backend-engineer/     # API Security, Validation, Error Handling
-    └── qa-tester/            # Build Verify, Smoke Test, Security Test
+|-- master_agent.md
+|-- RULE.md
+`-- sub_agents/
+    |-- frontend-engineer/
+    |-- backend-engineer/
+    `-- qa-tester/
 ```
+
+Use `.agent/RULE.md` and the relevant sub-agent rules before extending a module so new work stays consistent with the existing product surface.

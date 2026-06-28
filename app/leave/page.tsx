@@ -211,8 +211,19 @@ export default function LeavePage() {
                 border: '1px solid var(--border-default)',
                 backgroundColor: 'var(--bg-surface)',
                 boxShadow: 'var(--shadow-sm)',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
                 position: 'relative',
                 overflow: 'hidden'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = 'var(--shadow-overlay)';
+                e.currentTarget.style.borderColor = 'var(--border-focus)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'none';
+                e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+                e.currentTarget.style.borderColor = 'var(--border-default)';
               }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -356,7 +367,18 @@ export default function LeavePage() {
           border: '1px solid var(--border-default)',
           borderRadius: 'var(--radius-xl)',
           boxShadow: 'var(--shadow-sm)',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease'
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+          e.currentTarget.style.borderColor = 'var(--border-focus)';
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.transform = 'none';
+          e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+          e.currentTarget.style.borderColor = 'var(--border-default)';
         }}
       >
         <table className="data-table" data-testid="leave-table" role="table" style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -406,7 +428,7 @@ export default function LeavePage() {
                     </span>
                   </td>
                   <td style={{ padding: 'var(--space-4)', fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>
-                    {l.startDate} <span style={{ color: 'var(--text-muted)' }}>→</span> {l.endDate}
+                    {l.startDate} <span style={{ color: 'var(--text-muted)' }}>-</span> {l.endDate}
                   </td>
                   <td style={{ padding: 'var(--space-4)', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', maxWidth: 220 }}>
                     <span className="truncate block" title={l.reason}>{l.reason}</span>
