@@ -3,6 +3,9 @@ import store from '@/lib/store';
 import { pickFields } from '@/lib/api-utils';
 import { verifyToken, extractToken } from '@/lib/auth';
 import { ensureSeeded } from '@/lib/seed';
+import { getAuditActorFromPayload, recordAuditLog } from '@/lib/audit-log';
+import { COLLECTIONS } from '@/lib/constants';
+import type { User } from '@/lib/types';
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   ensureSeeded();
@@ -13,7 +16,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     await verifyToken(token);
 
     const { id } = await params;
-    const user = store.getById('users', id);
+    const user = store.getById(COLLECTIONS.USERS, id) as User | undefined;
     if (!user) return NextResponse.json({ success: false, error: 'Employee not found' }, { status: 404 });
 
     const { password: _, ...employee } = user;
@@ -44,12 +47,29 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const body = await request.json();
     const updates = pickFields(body, ['firstName', 'lastName', 'email', 'phone', 'department', 'position', 'status', 'avatar', 'joinDate']);
+    const existing = store.getById(COLLECTIONS.USERS, id) as User | undefined;
 
-    const updated = store.update('users', id, updates);
+    const updated = store.update(COLLECTIONS.USERS, id, updates) as User | undefined;
     if (!updated) return NextResponse.json({ success: false, error: 'Employee not found' }, { status: 404 });
 
     const { password: _, ...employee } = updated;
     void _;
+
+    recordAuditLog({
+      actor: getAuditActorFromPayload(payload),
+      action: 'update',
+      entityType: 'employee',
+      entityId: updated.id,
+      entityLabel: `${updated.firstName} ${updated.lastName}`,
+      summary: `Updated employee ${updated.firstName} ${updated.lastName}`,
+      metadata: {
+        previousDepartment: existing?.department || null,
+        currentDepartment: updated.department,
+        previousStatus: existing?.status || null,
+        currentStatus: updated.status,
+        changedFieldCount: Object.keys(updates).length
+      }
+    });
 
     return NextResponse.json({ success: true, data: employee, message: 'Employee updated' });
   } catch (error) {
@@ -79,8 +99,23 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       return NextResponse.json({ success: false, error: 'Cannot delete your own account' }, { status: 400 });
     }
 
-    const deleted = store.delete('users', id);
+    const existing = store.getById(COLLECTIONS.USERS, id) as User | undefined;
+    const deleted = store.delete(COLLECTIONS.USERS, id);
     if (!deleted) return NextResponse.json({ success: false, error: 'Employee not found' }, { status: 404 });
+
+    recordAuditLog({
+      actor: getAuditActorFromPayload(payload),
+      action: 'delete',
+      entityType: 'employee',
+      entityId: id,
+      entityLabel: existing ? `${existing.firstName} ${existing.lastName}` : id,
+      summary: `Deleted employee ${existing ? `${existing.firstName} ${existing.lastName}` : id}`,
+      metadata: {
+        department: existing?.department || null,
+        role: existing?.role || null,
+        status: existing?.status || null
+      }
+    });
 
     return NextResponse.json({ success: true, message: 'Employee deleted' });
   } catch (error) {

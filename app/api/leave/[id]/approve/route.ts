@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import store from '@/lib/store';
 import { verifyToken, extractToken } from '@/lib/auth';
 import { ensureSeeded } from '@/lib/seed';
+import { getAuditActorFromPayload, recordAuditLog } from '@/lib/audit-log';
+import { COLLECTIONS } from '@/lib/constants';
+import type { LeaveRequest, User } from '@/lib/types';
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   ensureSeeded();
@@ -16,7 +19,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     }
 
     const { id } = await params;
-    const leave = store.getById('leaves', id);
+    const leave = store.getById(COLLECTIONS.LEAVES, id) as LeaveRequest | undefined;
     if (!leave) return NextResponse.json({ success: false, error: 'Leave request not found' }, { status: 404 });
 
     if (payload.userId === leave.userId) {
@@ -34,14 +37,32 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ success: false, error: 'Action must be "approve" or "reject"' }, { status: 400 });
     }
 
-    const reviewer = store.getById('users', payload.userId);
-    const updated = store.update('leaves', id, {
+    const reviewer = store.getById(COLLECTIONS.USERS, payload.userId) as User | undefined;
+    const updated = store.update(COLLECTIONS.LEAVES, id, {
       status: action === 'approve' ? 'approved' : 'rejected',
       reviewedBy: payload.userId,
       reviewerName: reviewer ? `${reviewer.firstName} ${reviewer.lastName}` : 'Unknown',
       reviewNote: note || '',
       updatedAt: new Date().toISOString(),
-    });
+    }) as LeaveRequest | undefined;
+
+    if (updated) {
+      recordAuditLog({
+        actor: getAuditActorFromPayload(payload),
+        action,
+        entityType: 'leave',
+        entityId: updated.id,
+        entityLabel: updated.userName,
+        summary: `${action === 'approve' ? 'Approved' : 'Rejected'} leave request for ${updated.userName}`,
+        metadata: {
+          leaveType: updated.type,
+          startDate: updated.startDate,
+          endDate: updated.endDate,
+          previousStatus: leave.status,
+          currentStatus: updated.status
+        }
+      });
+    }
 
     return NextResponse.json({
       success: true,

@@ -2,12 +2,14 @@
 
 WorkNest is a company internal portal built as a realistic target application for automated E2E testing with Playwright and Page Object Model patterns.
 
-The app currently includes role-based authentication, employee management, department management, leave approval, meeting room booking, task board workflows, announcements, notifications, calendar views, dashboard analytics, and user settings.
+The app currently includes role-based authentication, employee management, department management, leave approval, meeting room booking, task board workflows, announcements, notifications, calendar views, dashboard analytics, admin audit logs, and user settings.
 
 ## Current Status Recap
 
 - Department Management is implemented with list, create, edit, deactivate, member assignment, stats, active status, and API-backed employee department options.
+- Audit Logs is implemented as an admin-only activity view with search, action/entity filters, pagination, and logging for seed reset, department changes, employee changes, and leave approval decisions.
 - UI consistency has been tightened across Dashboard, Employees, Departments, Leave Management, Tasks, Calendar, and Settings.
+- Sidebar navigation has been redesigned with Core, People, Work, Admin, and Account groups, calmer active states, stable collapsed icon navigation, and the existing admin-only Audit Logs visibility.
 - Employee avatars are deterministic flat SVG people avatars, synced across Employees, Departments, Tasks, Sidebar, and Settings.
 - Task Board layout now uses compact fit-content Kanban lanes, stable horizontal columns, and status dropdown layering that stays above cards below it.
 - Department loading states now match the shared dashboard/employee skeleton style.
@@ -76,6 +78,13 @@ The app currently includes role-based authentication, employee management, depar
 - Announcement feed with categories, pinned posts, comments, edit, and delete flows.
 - Notification center from the header bell.
 - Mark-as-read support through API.
+
+### Audit Logs
+
+- Admin-only `/audit-logs` page for reviewing system activity.
+- Search, action filter, entity type filter, and paginated table view.
+- Audit records capture actor, action, entity type, entity id, summary, timestamp, and sanitized metadata.
+- Covered actions include seed reset, department create/update/deactivate/member assignment, employee create/update/delete, and leave approve/reject decisions.
 
 ### Settings
 
@@ -193,6 +202,7 @@ worknest-site/
 |-- app/
 |   |-- api/
 |   |-- announcements/
+|   |-- audit-logs/
 |   |-- calendar/
 |   |-- departments/
 |   |-- employees/
@@ -209,6 +219,7 @@ worknest-site/
 |   `-- ui/
 |-- lib/
 |   |-- api-utils.ts
+|   |-- audit-log.ts
 |   |-- auth-context.tsx
 |   |-- auth.ts
 |   |-- constants.ts
@@ -226,13 +237,14 @@ worknest-site/
 
 ## API Surface
 
-There are currently 27 route handler files under `app/api`.
+There are currently 28 route handler files under `app/api`.
 
 | Group | Endpoint | Methods | Purpose |
 | :--- | :--- | :--- | :--- |
 | Auth | `/api/auth/login` | POST | Login and issue token. |
 | Auth | `/api/auth/register` | POST | Register a new user. |
 | Auth | `/api/auth/me` | GET | Return current user from token. |
+| Audit Logs | `/api/audit-logs` | GET | List sanitized admin-only audit log entries. |
 | Employees | `/api/employees` | GET, POST | List or create employees. |
 | Employees | `/api/employees/[id]` | GET, PUT, DELETE | Read, update, or delete an employee. |
 | Employees | `/api/employees/[id]/profile` | GET | Read employee profile data and metrics. |
@@ -263,6 +275,7 @@ There are currently 27 route handler files under `app/api`.
 - API routes, except auth entry points, verify JWT tokens.
 - Protected write routes whitelist accepted fields.
 - Role escalation through user update APIs is blocked.
+- Audit logs are restricted to Admin users and sanitize sensitive metadata before storage.
 - Leave self-approval is blocked for Manager and Admin users.
 - Seed reset requires Admin authentication.
 - JWT errors return 401 while unexpected server errors return 500.
@@ -272,6 +285,7 @@ There are currently 27 route handler files under `app/api`.
 The project keeps a strict UI consistency bar because it is used for visual and E2E testing.
 
 - Search controls, filters, refresh buttons, and table toolbars should match across pages.
+- Sidebar navigation should keep routes grouped for scanability, preserve collapsed icon access, and keep admin-only entries hidden for non-admin users.
 - Skeleton loading should use shared dashboard/employee patterns.
 - Tables should keep header and cell alignment consistent.
 - Cards should use the same hover elevation language across Dashboard, Departments, and Leave Management.
@@ -285,6 +299,7 @@ Recent checks completed during stabilization:
 - `npm run type-check`
 - `npm run build`
 - Browser smoke checks for Dashboard, Employees, Departments, Leave, Meetings, Calendar, Tasks, Announcements, and Settings.
+- Browser desktop checks for Audit Logs admin visibility, employee hidden navigation, stable `nav-audit-logs` selector, and collapsed sidebar dimensions.
 - Browser alignment checks for Settings menu-to-content positioning.
 - Browser interaction checks for Task Board status dropdown layering.
 

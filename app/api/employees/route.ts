@@ -3,6 +3,9 @@ import store from '@/lib/store';
 import { verifyToken, extractToken } from '@/lib/auth';
 import { ensureSeeded } from '@/lib/seed';
 import { createEmployeeAvatar } from '@/lib/utils';
+import { getAuditActorFromPayload, recordAuditLog } from '@/lib/audit-log';
+import { COLLECTIONS } from '@/lib/constants';
+import type { Employee, User } from '@/lib/types';
 
 export async function GET(request: Request) {
   ensureSeeded();
@@ -21,7 +24,7 @@ export async function GET(request: Request) {
     const page = parseInt(url.searchParams.get('page') || '1') || 1;
     const limit = parseInt(url.searchParams.get('limit') || '10') || 10;
 
-    let employees = store.getAll('users').map(u => {
+    let employees: Employee[] = (store.getAll(COLLECTIONS.USERS) as User[]).map(u => {
       const { password: _, ...emp } = u;
       void _;
       return emp;
@@ -45,7 +48,7 @@ export async function GET(request: Request) {
       employees = employees.filter(e => e.status === status);
     }
 
-    employees = store.sort(employees, sortBy, sortOrder);
+    employees = store.sort(employees, sortBy, sortOrder) as Employee[];
     const result = store.paginate(employees, page, limit);
 
     return NextResponse.json({ success: true, ...result });
@@ -73,13 +76,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Required fields: email, firstName, lastName' }, { status: 400 });
     }
 
-    const existing = store.getAll('users').find(u => u.email === email);
+    const existing = (store.getAll(COLLECTIONS.USERS) as User[]).find(u => u.email === email);
     if (existing) {
       return NextResponse.json({ success: false, error: 'Email already exists' }, { status: 409 });
     }
 
     const { hashPassword } = await import('@/lib/auth');
-    const employee = store.create('users', {
+    const employee = store.create(COLLECTIONS.USERS, {
       email,
       password: hashPassword('password123'),
       firstName,
@@ -91,13 +94,28 @@ export async function POST(request: Request) {
       avatar: createEmployeeAvatar(firstName, lastName, email),
       joinDate: new Date().toISOString().split('T')[0],
       status: status || 'active',
-    });
+    }) as User;
 
     const { password: _, ...empWithoutPassword } = employee;
     void _;
 
+    recordAuditLog({
+      actor: getAuditActorFromPayload(payload),
+      action: 'create',
+      entityType: 'employee',
+      entityId: employee.id,
+      entityLabel: `${employee.firstName} ${employee.lastName}`,
+      summary: `Created employee ${employee.firstName} ${employee.lastName}`,
+      metadata: {
+        role: employee.role,
+        department: employee.department,
+        status: employee.status
+      }
+    });
+
     return NextResponse.json({ success: true, data: empWithoutPassword, message: 'Employee created' }, { status: 201 });
-  } catch {
+  } catch (error) {
+    console.error('[employees POST] error:', error);
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

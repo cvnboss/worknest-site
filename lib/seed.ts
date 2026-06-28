@@ -15,6 +15,7 @@ export function ensureSeeded() {
   seedTasks();
   seedAnnouncements();
   seedNotifications();
+  seedAuditLogs();
 
   store.setInitialized();
 }
@@ -252,4 +253,8 @@ function seedNotifications() {
   ];
 
   notifications.forEach(n => store.create('notifications', n));
+}
+
+function seedAuditLogs() {
+  store.getCollection(COLLECTIONS.AUDIT_LOGS);
 }

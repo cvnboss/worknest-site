@@ -4,6 +4,7 @@ import { extractToken, verifyToken } from '@/lib/auth';
 import { ensureSeeded } from '@/lib/seed';
 import { COLLECTIONS } from '@/lib/constants';
 import { isJwtError, omitPassword } from '@/lib/api-utils';
+import { getAuditActorFromPayload, recordAuditLog } from '@/lib/audit-log';
 import type { Department, Employee, User } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -73,6 +74,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     }
 
     const selectedUserIds = new Set(uniqueUserIds);
+    const previousMemberIds = users
+      .filter((user) => user.department === department.name)
+      .map((user) => user.id);
 
     users
       .filter((user) => user.department === department.name && !selectedUserIds.has(user.id))
@@ -85,6 +89,19 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     });
 
     const updatedMembers = getDepartmentMembers(department.name);
+    recordAuditLog({
+      actor: getAuditActorFromPayload(payload),
+      action: 'assign',
+      entityType: 'department_members',
+      entityId: department.id,
+      entityLabel: department.name,
+      summary: `Assigned ${uniqueUserIds.length} employee${uniqueUserIds.length === 1 ? '' : 's'} to ${department.name}`,
+      metadata: {
+        previousMemberCount: previousMemberIds.length,
+        currentMemberCount: updatedMembers.length
+      }
+    });
+
     return NextResponse.json({
       success: true,
       data: updatedMembers,
