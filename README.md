@@ -9,6 +9,7 @@ The app currently includes role-based authentication, employee management, depar
 - Department Management is implemented with list, create, edit, deactivate, member assignment, stats, active status, and API-backed employee department options.
 - Audit Logs is implemented as an admin-only activity view with search, action/entity filters, pagination, and logging for seed reset, department changes, employee changes, and leave approval decisions.
 - UI consistency has been tightened across Dashboard, Employees, Departments, Leave Management, Tasks, Calendar, and Settings.
+- Create, edit, booking, member-management, and detail flows now use centered modal/dialog patterns instead of right-side drawers.
 - Sidebar navigation has been redesigned with Core, People, Work, Admin, and Account groups, calmer active states, stable collapsed icon navigation, and the existing admin-only Audit Logs visibility.
 - Employee avatars are deterministic flat SVG people avatars, synced across Employees, Departments, Tasks, Sidebar, and Settings.
 - Task Board layout now uses compact fit-content Kanban lanes, stable horizontal columns, and status dropdown layering that stays above cards below it.
@@ -57,7 +58,7 @@ The app currently includes role-based authentication, employee management, depar
 ### Meeting Room Booking
 
 - Meeting room list with capacity, floor, amenities, and availability timeline.
-- Booking drawer with date/time controls.
+- Centered booking modal with date/time controls.
 - Conflict prevention for overlapping bookings.
 
 ### Task Board
@@ -83,6 +84,7 @@ The app currently includes role-based authentication, employee management, depar
 
 - Admin-only `/audit-logs` page for reviewing system activity.
 - Search, action filter, entity type filter, and paginated table view.
+- Centered detail modal for inspecting log metadata without opening a side column.
 - Audit records capture actor, action, entity type, entity id, summary, timestamp, and sanitized metadata.
 - Covered actions include seed reset, department create/update/deactivate/member assignment, employee create/update/delete, and leave approve/reject decisions.
 
@@ -285,6 +287,8 @@ There are currently 28 route handler files under `app/api`.
 The project keeps a strict UI consistency bar because it is used for visual and E2E testing.
 
 - Search controls, filters, refresh buttons, and table toolbars should match across pages.
+- Create/edit/detail/booking flows should use centered modal/dialog layouts with a backdrop, clear max-width, internal body scroll, and no right-side drawer or slide-in animation.
+- Legacy `data-testid` names may contain `drawer` only to preserve E2E compatibility; visual classes and layout should still be modal/dialog based.
 - Sidebar navigation should keep routes grouped for scanability, preserve collapsed icon access, and keep admin-only entries hidden for non-admin users.
 - Skeleton loading should use shared dashboard/employee patterns.
 - Tables should keep header and cell alignment consistent.
@@ -300,6 +304,7 @@ Recent checks completed during stabilization:
 - `npm run build`
 - Browser smoke checks for Dashboard, Employees, Departments, Leave, Meetings, Calendar, Tasks, Announcements, and Settings.
 - Browser desktop checks for Audit Logs admin visibility, employee hidden navigation, stable `nav-audit-logs` selector, and collapsed sidebar dimensions.
+- Browser desktop checks for centered create/edit/detail modals across Employees, Departments, Leave, Meetings, Tasks, Announcements, and Audit Logs; no `.drawer`, `.drawer-overlay`, or `.animate-slideInRight` UI classes remain in these flows.
 - Browser alignment checks for Settings menu-to-content positioning.
 - Browser interaction checks for Task Board status dropdown layering.
 

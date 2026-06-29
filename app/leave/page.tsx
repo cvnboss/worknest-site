@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useToast } from '@/lib/toast-context';
 import CustomSelect from '@/components/ui/CustomSelect';
-import { CalendarDays, Thermometer, User, Home, ClipboardList, Check, X, Trash2, Plus, Filter, ChevronRight } from 'lucide-react';
+import { CalendarDays, Thermometer, User, Home, ClipboardList, Check, X, Trash2, Plus, Filter } from 'lucide-react';
 
 interface LeaveData { id: string; userId: string; userName: string; type: string; startDate: string; endDate: string; reason: string; status: string; reviewerName?: string; reviewNote?: string; createdAt: string; }
 
@@ -495,32 +495,33 @@ export default function LeavePage() {
         </table>
       </div>
 
-      {/* Form Drawer (New Leave Request) */}
+      {/* New Leave Request Modal */}
       {showCreateModal && (
-        <div className="drawer-overlay" onClick={() => setShowCreateModal(false)} style={{ display: 'flex', justifyContent: 'flex-end', zIndex: 1000, backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(2px)' }}>
+        <div className="modal-overlay animate-fadeIn app-form-dialog-overlay" onClick={() => setShowCreateModal(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(2px)', padding: 'var(--space-6)' }}>
           <div 
-            className="drawer animate-slideInRight" 
+            className="modal app-form-dialog animate-scaleIn" 
             onClick={e => e.stopPropagation()} 
             role="dialog" 
             aria-labelledby="leave-modal-title"
+            aria-modal="true"
             style={{
               width: '100%',
-              maxWidth: '480px',
-              height: '100vh',
+              maxWidth: '560px',
+              maxHeight: 'calc(100vh - 48px)',
               backgroundColor: 'var(--bg-surface)',
-              borderLeft: '1px solid var(--border-default)',
               boxShadow: 'var(--shadow-2xl)',
               display: 'flex',
               flexDirection: 'column',
-              padding: 0
+              padding: 0,
+              overflow: 'hidden'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'var(--space-5) var(--space-6)', borderBottom: '1px solid var(--border-default)', backgroundColor: 'rgba(248, 250, 252, 0.5)' }}>
-              <h3 className="drawer-title" id="leave-modal-title" style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ChevronRight size={18} className="text-muted" /> New Leave Request
+            <div className="modal-header app-form-dialog-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'var(--space-5) var(--space-6)', borderBottom: '1px solid var(--border-default)', backgroundColor: 'rgba(248, 250, 252, 0.5)' }}>
+              <h3 className="modal-title app-form-dialog-title" id="leave-modal-title" style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                New Leave Request
               </h3>
               <button 
-                className="drawer-close" 
+                className="modal-close app-form-dialog-close" 
                 onClick={() => setShowCreateModal(false)}
                 style={{
                   border: 'none',
@@ -538,8 +539,8 @@ export default function LeavePage() {
               </button>
             </div>
             
-            <form onSubmit={handleCreate} data-testid="leave-form" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', margin: 0 }}>
-              <div className="drawer-body" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', padding: 'var(--space-6)', overflowY: 'auto', flex: 1 }}>
+            <form className="app-form-dialog-form" onSubmit={handleCreate} data-testid="leave-form" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', margin: 0 }}>
+              <div className="modal-body app-form-dialog-body" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', padding: 'var(--space-6)', overflowY: 'auto', flex: 1 }}>
                 
                 {/* Leave Type */}
                 <div className="form-group" style={{ margin: 0 }}>
@@ -604,7 +605,7 @@ export default function LeavePage() {
 
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-3)', padding: 'var(--space-4) var(--space-6)', borderTop: '1px solid var(--border-default)', backgroundColor: 'rgba(248, 250, 252, 0.5)' }}>
+              <div className="modal-footer app-form-dialog-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-3)', padding: 'var(--space-4) var(--space-6)', borderTop: '1px solid var(--border-default)', backgroundColor: 'rgba(248, 250, 252, 0.5)' }}>
                 <button type="button" className="btn btn-ghost" onClick={() => setShowCreateModal(false)} style={{ padding: '8px 16px', fontWeight: 600 }}>
                   Cancel
                 </button>

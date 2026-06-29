@@ -530,18 +530,6 @@ export default function DepartmentsPage() {
           >
             <RefreshCw size={16} /> Refresh
           </button>
-          {isAdmin && (
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={openCreateDepartment}
-              disabled={!departmentApiAvailable}
-              data-testid="create-department-inline-btn"
-              title={departmentApiAvailable ? 'Create department' : 'Requires Department API'}
-            >
-              <Building2 size={16} /> New Department
-            </button>
-          )}
         </div>
       </div>
 
@@ -784,87 +772,89 @@ export default function DepartmentsPage() {
       </div>
 
       {showForm && (
-        <div className="drawer-overlay animate-fadeIn" onClick={() => setShowForm(false)} data-testid="department-drawer-overlay">
-          <div className="drawer department-drawer animate-slideInRight" onClick={event => event.stopPropagation()} role="dialog" aria-labelledby="department-form-title" aria-modal="true">
-            <div className="drawer-header">
+        <div className="modal-overlay animate-fadeIn department-dialog-overlay" onClick={() => setShowForm(false)} data-testid="department-drawer-overlay">
+          <div className="modal department-dialog animate-scaleIn" onClick={event => event.stopPropagation()} role="dialog" aria-labelledby="department-form-title" aria-modal="true">
+            <div className="modal-header department-dialog-header">
               <div>
-                <h3 id="department-form-title" className="drawer-title">
+                <h3 id="department-form-title" className="modal-title department-dialog-title">
                   {editingDepartment ? 'Edit Department' : 'New Department'}
                 </h3>
-                <p className="department-drawer-subtitle">
+                <p className="department-dialog-subtitle">
                   {editingDepartment ? 'Update department details without changing existing employee records directly.' : 'Create a department for employee grouping and reporting.'}
                 </p>
               </div>
-              <button type="button" className="drawer-close" onClick={() => setShowForm(false)} aria-label="Close department form" data-testid="close-department-form">
+              <button type="button" className="modal-close department-dialog-close" onClick={() => setShowForm(false)} aria-label="Close department form" data-testid="close-department-form">
                 <X size={20} />
               </button>
             </div>
 
-            <form className="drawer-body department-form" onSubmit={saveDepartment} data-testid="department-form">
-              <div className="form-group">
-                <label className="form-label required" htmlFor="department-name">Department Name</label>
-                <input
-                  id="department-name"
-                  className="form-input"
-                  value={formData.name}
-                  onChange={event => setFormData(prev => ({ ...prev, name: event.target.value }))}
-                  maxLength={80}
-                  required
-                  data-testid="department-name"
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label" htmlFor="department-description">Description</label>
-                <textarea
-                  id="department-description"
-                  className="form-textarea"
-                  value={formData.description}
-                  onChange={event => setFormData(prev => ({ ...prev, description: event.target.value }))}
-                  maxLength={500}
-                  data-testid="department-description"
-                />
-              </div>
-
-              <div className="department-form-row">
+            <form className="department-form" onSubmit={saveDepartment} data-testid="department-form">
+              <div className="modal-body department-dialog-body">
                 <div className="form-group">
-                  <label className="form-label">Manager</label>
-                  <CustomSelect
-                    value={formData.managerId || 'none'}
-                    onChange={value => setFormData(prev => ({ ...prev, managerId: value === 'none' ? '' : value }))}
-                    testId="department-manager"
-                    width="100%"
-                    icon={null}
-                    options={[
-                      { value: 'none', label: 'No Manager' },
-                      ...managerOptions.map(employee => ({ value: employee.id, label: employeeName(employee) }))
-                    ]}
+                  <label className="form-label required" htmlFor="department-name">Department Name</label>
+                  <input
+                    id="department-name"
+                    className="form-input"
+                    value={formData.name}
+                    onChange={event => setFormData(prev => ({ ...prev, name: event.target.value }))}
+                    maxLength={80}
+                    required
+                    data-testid="department-name"
                   />
                 </div>
+
                 <div className="form-group">
-                  <label className="form-label">Status</label>
-                  <CustomSelect
-                    value={formData.status}
-                    onChange={value => setFormData(prev => ({ ...prev, status: value === 'inactive' ? 'inactive' : 'active' }))}
-                    testId="department-status"
-                    width="100%"
-                    icon={null}
-                    options={[
-                      { value: 'active', label: 'Active' },
-                      { value: 'inactive', label: 'Inactive' }
-                    ]}
+                  <label className="form-label" htmlFor="department-description">Description</label>
+                  <textarea
+                    id="department-description"
+                    className="form-textarea"
+                    value={formData.description}
+                    onChange={event => setFormData(prev => ({ ...prev, description: event.target.value }))}
+                    maxLength={500}
+                    data-testid="department-description"
                   />
                 </div>
+
+                <div className="department-form-row">
+                  <div className="form-group">
+                    <label className="form-label">Manager</label>
+                    <CustomSelect
+                      value={formData.managerId || 'none'}
+                      onChange={value => setFormData(prev => ({ ...prev, managerId: value === 'none' ? '' : value }))}
+                      testId="department-manager"
+                      width="100%"
+                      icon={null}
+                      options={[
+                        { value: 'none', label: 'No Manager' },
+                        ...managerOptions.map(employee => ({ value: employee.id, label: employeeName(employee) }))
+                      ]}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Status</label>
+                    <CustomSelect
+                      value={formData.status}
+                      onChange={value => setFormData(prev => ({ ...prev, status: value === 'inactive' ? 'inactive' : 'active' }))}
+                      testId="department-status"
+                      width="100%"
+                      icon={null}
+                      options={[
+                        { value: 'active', label: 'Active' },
+                        { value: 'inactive', label: 'Inactive' }
+                      ]}
+                    />
+                  </div>
+                </div>
+
+                {editingDepartment && editingDepartment.employeeCount > 0 && editingDepartment.name !== formData.name.trim() && (
+                  <div className="department-inline-alert" role="status">
+                    <AlertTriangle size={16} />
+                    Employees assigned to this department will move to the new department name.
+                  </div>
+                )}
               </div>
 
-              {editingDepartment && editingDepartment.employeeCount > 0 && editingDepartment.name !== formData.name.trim() && (
-                <div className="department-inline-alert" role="status">
-                  <AlertTriangle size={16} />
-                  Employees assigned to this department will move to the new department name.
-                </div>
-              )}
-
-              <div className="drawer-footer">
+              <div className="modal-footer department-dialog-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>
                   Cancel
                 </button>
@@ -901,19 +891,19 @@ export default function DepartmentsPage() {
       )}
 
       {memberDepartment && (
-        <div className="drawer-overlay animate-fadeIn" onClick={() => setMemberDepartment(null)} data-testid="member-drawer-overlay">
-          <div className="drawer department-drawer animate-slideInRight" onClick={event => event.stopPropagation()} role="dialog" aria-labelledby="members-title" aria-modal="true">
-            <div className="drawer-header">
+        <div className="modal-overlay animate-fadeIn department-dialog-overlay" onClick={() => setMemberDepartment(null)} data-testid="member-drawer-overlay">
+          <div className="modal department-dialog department-members-dialog animate-scaleIn" onClick={event => event.stopPropagation()} role="dialog" aria-labelledby="members-title" aria-modal="true">
+            <div className="modal-header department-dialog-header">
               <div>
-                <h3 id="members-title" className="drawer-title">Manage Members</h3>
-                <p className="department-drawer-subtitle">{memberDepartment.name}</p>
+                <h3 id="members-title" className="modal-title department-dialog-title">Manage Members</h3>
+                <p className="department-dialog-subtitle">{memberDepartment.name}</p>
               </div>
-              <button type="button" className="drawer-close" onClick={() => setMemberDepartment(null)} aria-label="Close member manager">
+              <button type="button" className="modal-close department-dialog-close" onClick={() => setMemberDepartment(null)} aria-label="Close member manager">
                 <X size={20} />
               </button>
             </div>
 
-            <div className="drawer-body department-members-body">
+            <div className="modal-body department-dialog-body department-members-body">
               <div className="search-bar departments-search">
                 <span className="search-bar-icon"><Search size={18} /></span>
                 <input
@@ -967,7 +957,7 @@ export default function DepartmentsPage() {
               )}
             </div>
 
-            <div className="drawer-footer">
+            <div className="modal-footer department-dialog-footer">
               <button type="button" className="btn btn-secondary" onClick={() => setMemberDepartment(null)}>
                 Cancel
               </button>

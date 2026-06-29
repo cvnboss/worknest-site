@@ -373,40 +373,50 @@ export default function AuditLogsPage() {
       </div>
 
       {selectedLog && (
-        <div className="drawer-overlay animate-fadeIn" onClick={() => setSelectedLog(null)} data-testid="audit-detail-drawer-overlay">
-          <div className="drawer audit-drawer animate-slideInRight" onClick={event => event.stopPropagation()} role="dialog" aria-labelledby="audit-detail-title" aria-modal="true">
-            <div className="drawer-header">
+        <div className="modal-overlay animate-fadeIn audit-detail-overlay" onClick={() => setSelectedLog(null)} data-testid="audit-detail-drawer-overlay">
+          <div className="modal audit-detail-dialog animate-scaleIn" onClick={event => event.stopPropagation()} role="dialog" aria-labelledby="audit-detail-title" aria-modal="true" data-testid="audit-detail-modal">
+            <div className="modal-header audit-detail-header">
               <div>
-                <h3 id="audit-detail-title" className="drawer-title">Audit Details</h3>
-                <p className="department-drawer-subtitle">{formatTime(selectedLog.createdAt)}</p>
+                <h3 id="audit-detail-title" className="modal-title audit-detail-title">Audit Details</h3>
+                <p className="department-dialog-subtitle">{formatTime(selectedLog.createdAt)}</p>
               </div>
-              <button type="button" className="drawer-close" onClick={() => setSelectedLog(null)} aria-label="Close audit details" data-testid="close-audit-details">
+              <button type="button" className="modal-close department-dialog-close" onClick={() => setSelectedLog(null)} aria-label="Close audit details" data-testid="close-audit-details">
                 <X size={20} />
               </button>
             </div>
-            <div className="drawer-body audit-detail-body">
-              <div className="audit-detail-row"><span>Actor</span><strong>{selectedLog.actorName}</strong></div>
-              <div className="audit-detail-row"><span>Role</span><strong>{formatLabel(selectedLog.actorRole)}</strong></div>
-              <div className="audit-detail-row"><span>Action</span><strong>{formatLabel(selectedLog.action)}</strong></div>
-              <div className="audit-detail-row"><span>Entity</span><strong>{formatLabel(selectedLog.entityType)}</strong></div>
-              <div className="audit-detail-row"><span>Target</span><strong>{selectedLog.entityLabel || selectedLog.entityId || '-'}</strong></div>
-              <div className="audit-detail-summary">
+            <div className="modal-body audit-detail-body">
+              <div className="audit-detail-summary audit-detail-summary-hero">
                 <span>Summary</span>
                 <p>{selectedLog.summary}</p>
               </div>
-              <div className="audit-metadata">
-                <h4>Metadata</h4>
+              <div className="audit-detail-grid">
+                <div className="audit-detail-row"><span>Actor</span><strong>{selectedLog.actorName}</strong></div>
+                <div className="audit-detail-row"><span>Role</span><strong>{formatLabel(selectedLog.actorRole)}</strong></div>
+                <div className="audit-detail-row"><span>Action</span><strong>{formatLabel(selectedLog.action)}</strong></div>
+                <div className="audit-detail-row"><span>Entity</span><strong>{formatLabel(selectedLog.entityType)}</strong></div>
+                <div className="audit-detail-row"><span>Target</span><strong>{selectedLog.entityLabel || selectedLog.entityId || '-'}</strong></div>
+                <div className="audit-detail-row"><span>Time</span><strong>{formatTime(selectedLog.createdAt)}</strong></div>
+              </div>
+              <div className="audit-detail-summary">
+                <span>Metadata</span>
                 {selectedLog.metadata && Object.keys(selectedLog.metadata).length > 0 ? (
-                  Object.entries(selectedLog.metadata).map(([key, value]) => (
-                    <div className="audit-detail-row" key={key}>
-                      <span>{formatLabel(key)}</span>
-                      <strong>{value === null ? '-' : String(value)}</strong>
-                    </div>
-                  ))
+                  <div className="audit-metadata-grid">
+                    {Object.entries(selectedLog.metadata).map(([key, value]) => (
+                      <div className="audit-detail-row" key={key}>
+                        <span>{formatLabel(key)}</span>
+                        <strong>{value === null ? '-' : String(value)}</strong>
+                      </div>
+                    ))}
+                  </div>
                 ) : (
                   <p>No metadata recorded.</p>
                 )}
               </div>
+            </div>
+            <div className="modal-footer audit-detail-footer">
+              <button type="button" className="btn btn-secondary" onClick={() => setSelectedLog(null)}>
+                Close
+              </button>
             </div>
           </div>
         </div>
