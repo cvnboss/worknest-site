@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useToast } from '@/lib/toast-context';
 import CustomSelect from '@/components/ui/CustomSelect';
-import { MessageSquare, Pin, Trash2, Megaphone, X, Plus, List, AlertCircle, Calendar, Shield, Send, ChevronRight, Clock, Layers } from 'lucide-react';
+import { MessageSquare, Pin, Trash2, Megaphone, X, Plus, List, AlertCircle, Calendar, Shield, Send, Clock, Layers } from 'lucide-react';
 import { getAvatarColor, timeAgo } from '@/lib/utils';
 
 interface AnnouncementData { id: string; title: string; content: string; author: string; authorName: string; category: string; isPinned: boolean; comments: CommentData[]; createdAt: string; }
@@ -408,32 +408,33 @@ export default function AnnouncementsPage() {
         </div>
       )}
 
-      {/* Form Drawer (New Announcement) */}
+      {/* New Announcement Modal */}
       {showCreateModal && (
-        <div className="drawer-overlay" onClick={() => setShowCreateModal(false)} style={{ display: 'flex', justifyContent: 'flex-end', zIndex: 1000, backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(2px)' }}>
+        <div className="modal-overlay animate-fadeIn app-form-dialog-overlay" onClick={() => setShowCreateModal(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(2px)', padding: 'var(--space-6)' }}>
           <div 
-            className="drawer animate-slideInRight" 
+            className="modal app-form-dialog animate-scaleIn" 
             onClick={e => e.stopPropagation()} 
             role="dialog" 
             aria-labelledby="ann-modal-title"
+            aria-modal="true"
             style={{
               width: '100%',
-              maxWidth: '480px',
-              height: '100vh',
+              maxWidth: '620px',
+              maxHeight: 'calc(100vh - 48px)',
               backgroundColor: 'var(--bg-surface)',
-              borderLeft: '1px solid var(--border-default)',
               boxShadow: 'var(--shadow-2xl)',
               display: 'flex',
               flexDirection: 'column',
-              padding: 0
+              padding: 0,
+              overflow: 'hidden'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'var(--space-5) var(--space-6)', borderBottom: '1px solid var(--border-default)', backgroundColor: 'rgba(248, 250, 252, 0.5)' }}>
-              <h3 className="drawer-title" id="ann-modal-title" style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ChevronRight size={18} className="text-muted" /> New Announcement
+            <div className="modal-header app-form-dialog-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'var(--space-5) var(--space-6)', borderBottom: '1px solid var(--border-default)', backgroundColor: 'rgba(248, 250, 252, 0.5)' }}>
+              <h3 className="modal-title app-form-dialog-title" id="ann-modal-title" style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                New Announcement
               </h3>
               <button 
-                className="drawer-close" 
+                className="modal-close app-form-dialog-close" 
                 onClick={() => setShowCreateModal(false)}
                 style={{
                   border: 'none',
@@ -451,8 +452,8 @@ export default function AnnouncementsPage() {
               </button>
             </div>
             
-            <form onSubmit={handleCreate} data-testid="announcement-form" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', margin: 0 }}>
-              <div className="drawer-body" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', padding: 'var(--space-6)', overflowY: 'auto', flex: 1 }}>
+            <form className="app-form-dialog-form" onSubmit={handleCreate} data-testid="announcement-form" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', margin: 0 }}>
+              <div className="modal-body app-form-dialog-body" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', padding: 'var(--space-6)', overflowY: 'auto', flex: 1 }}>
                 
                 {/* Title */}
                 <div className="form-group" style={{ margin: 0 }}>
@@ -517,7 +518,7 @@ export default function AnnouncementsPage() {
 
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-3)', padding: 'var(--space-4) var(--space-6)', borderTop: '1px solid var(--border-default)', backgroundColor: 'rgba(248, 250, 252, 0.5)' }}>
+              <div className="modal-footer app-form-dialog-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-3)', padding: 'var(--space-4) var(--space-6)', borderTop: '1px solid var(--border-default)', backgroundColor: 'rgba(248, 250, 252, 0.5)' }}>
                 <button type="button" className="btn btn-ghost" onClick={() => setShowCreateModal(false)} style={{ padding: '8px 16px', fontWeight: 600 }}>
                   Cancel
                 </button>

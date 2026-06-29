@@ -792,10 +792,10 @@ export default function EmployeesPage() {
         )}
       </div>
 
-      {/* Slide-out Create/Edit Drawer */}
+      {/* Create/Edit Employee Modal */}
       {showModal && (
         <div 
-          className="drawer-overlay animate-fadeIn" 
+          className="modal-overlay animate-fadeIn app-form-dialog-overlay" 
           onClick={() => setShowModal(false)} 
           data-testid="employee-modal-overlay"
           style={{
@@ -805,39 +805,42 @@ export default function EmployeesPage() {
             backdropFilter: 'blur(4px)',
             zIndex: 100,
             display: 'flex',
-            justifyContent: 'flex-end'
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 'var(--space-6)'
           }}
         >
           <div 
-            className="drawer animate-slideInRight" 
+            className="modal app-form-dialog app-form-dialog-lg animate-scaleIn" 
             onClick={e => e.stopPropagation()} 
             role="dialog" 
             aria-labelledby="employee-modal-title"
+            aria-modal="true"
             style={{
               width: '100%',
-              maxWidth: '480px',
+              maxWidth: '680px',
               backgroundColor: 'var(--bg-surface)',
-              height: '100%',
+              maxHeight: 'calc(100vh - 48px)',
               boxShadow: 'var(--shadow-overlay)',
               display: 'flex',
               flexDirection: 'column',
-              padding: 'var(--space-6)',
-              overflowY: 'auto'
+              padding: 0,
+              overflow: 'hidden'
             }}
           >
             {/* Header */}
             <div 
+              className="modal-header app-form-dialog-header"
               style={{ 
                 display: 'flex', 
                 justifyContent: 'space-between', 
                 alignItems: 'center', 
                 borderBottom: '1px solid var(--border-default)', 
-                paddingBottom: 'var(--space-4)',
-                marginBottom: 'var(--space-5)'
+                padding: 'var(--space-5) var(--space-6)'
               }}
             >
               <div>
-                <h3 className="drawer-title" id="employee-modal-title" style={{ margin: 0, fontSize: '20px', fontWeight: 800 }}>
+                <h3 className="modal-title app-form-dialog-title" id="employee-modal-title" style={{ margin: 0, fontSize: '20px', fontWeight: 800 }}>
                   {editingEmployee ? 'Edit Employee Details' : 'Register New Employee'}
                 </h3>
                 <p style={{ margin: '4px 0 0 0', fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>
@@ -846,7 +849,7 @@ export default function EmployeesPage() {
               </div>
               
               <button 
-                className="drawer-close" 
+                className="modal-close app-form-dialog-close" 
                 onClick={() => setShowModal(false)} 
                 data-testid="close-modal"
                 style={{
@@ -863,8 +866,8 @@ export default function EmployeesPage() {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSave} data-testid="employee-form" style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)', flex: 1 }}>
+            <form className="app-form-dialog-form" onSubmit={handleSave} data-testid="employee-form" style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', margin: 0 }}>
+              <div className="modal-body app-form-dialog-body" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)', flex: 1, padding: 'var(--space-6)', overflowY: 'auto' }}>
                 
                 {/* Personal Info Section */}
                 <div>
@@ -999,14 +1002,16 @@ export default function EmployeesPage() {
 
               </div>
 
-              {/* Drawer Footer Actions */}
+              {/* Footer Actions */}
               <div 
+                className="modal-footer app-form-dialog-footer"
                 style={{ 
                   display: 'flex', 
+                  justifyContent: 'flex-end',
                   gap: 'var(--space-3)', 
                   borderTop: '1px solid var(--border-default)', 
-                  paddingTop: 'var(--space-4)', 
-                  marginTop: 'var(--space-6)' 
+                  padding: 'var(--space-4) var(--space-6)',
+                  backgroundColor: 'var(--bg-page)'
                 }}
               >
                 <button 

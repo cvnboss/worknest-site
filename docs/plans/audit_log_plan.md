@@ -1,8 +1,36 @@
 # Audit Log Detailed Plan
 
-Status: selected next feature, pending approval before implementation.
+Status: Phase A implemented, desktop-verified, and moved to maintain mode. Phase B remains optional.
 
 This plan was split out of `docs/feature_priority_and_department_plan.md` to keep the root priority plan short.
+
+## Implementation Recap
+
+Completed:
+
+1. Audit types and `AUDIT_LOGS` collection.
+2. Safe audit helper in `lib/audit-log.ts`.
+3. Admin-only `GET /api/audit-logs` with search, filters, pagination, and newest-first sorting.
+4. `/audit-logs` page with toolbar, table, detail view, loading, empty, and forbidden states.
+5. Sidebar and Header integration for Admin users.
+6. Phase A instrumentation:
+   - Seed reset.
+   - Department create, update, deactivate, and member assignment.
+   - Employee create, update, and delete.
+   - Leave approve and reject decisions.
+
+Verification completed:
+
+1. `npm run type-check`
+2. `npm run build`
+3. API smoke checks for admin access, employee forbidden access, seed reset log, and department mutation log.
+4. Desktop browser checks for Admin Audit Logs navigation, Employee hidden Admin navigation, stable `nav-audit-logs` selector, collapsed sidebar dimensions, and no horizontal overflow.
+
+Maintenance notes:
+
+1. Keep audit metadata sanitized and compact.
+2. Add Phase B instrumentation only when touching the relevant module or when traceability becomes necessary.
+3. Do not add a public write endpoint for audit logs.
 
 ## Goal
 
@@ -340,4 +368,4 @@ Optional Phase B files:
 7. Run browser UI checks.
 8. Decide whether to continue Phase B instrumentation.
 
-Do not implement Audit Log until this plan is approved.
+Do not implement Phase B Audit Log instrumentation until the specific module change is approved.

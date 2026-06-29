@@ -21,7 +21,9 @@
 - Không hardcode màu sắc — dùng `var(--color-*)` tokens
 - Responsive design: mobile-first với media queries
 - Animation: sử dụng `@keyframes` + CSS classes, không JS-driven inline styles
-- UI mới phải reuse visual patterns đã có trước khi tạo CSS riêng: toolbar, filter, search, table, card, modal, drawer
+- UI mới phải reuse visual patterns đã có trước khi tạo CSS riêng: toolbar, filter, search, table, card, centered modal/dialog
+- Không dùng right-side drawer/side column cho flow tạo mới, chỉnh sửa, quản lý thành viên, hoặc xem detail nếu user không yêu cầu rõ. Các flow này mặc định phải dùng centered modal/dialog cân xứng, có backdrop, max-width rõ ràng, body scroll nội bộ khi nội dung dài, và không dùng animation slide-in từ cạnh phải.
+- Nếu bắt buộc giữ `data-testid` cũ có chữ `drawer` để không phá E2E, class/layout thực tế vẫn phải là modal/dialog; không để `.drawer`, `.drawer-overlay`, hoặc `.animate-slideInRight` áp vào UI mới.
 - Toolbar/filter controls phải đồng bộ chiều cao: search input, dropdown, segmented control, button trong cùng hàng phải cùng computed height (mặc định 40px nếu page chuẩn đang dùng 40px)
 - Khi tạo page mới, so sánh với page gần nhất đang có pattern tương tự (ví dụ Employees cho list/table/filter pages) về spacing, border radius, border, shadow, font-size, control height trước khi hoàn thành
 - Không tạo style riêng cho search/filter nếu `.filter-bar`, `.search-bar`, `.search-bar-input`, `.btn`, `CustomSelect` đã đáp ứng layout cần thiết
@@ -93,5 +95,6 @@
 - Trước khi deliver UI mới, phải verify visual consistency với page có pattern tương tự: desktop + mobile, không horizontal overflow, không text clipping, không control height mismatch
 - Phải kiểm tra initial loading bằng reload thật: không flash alert màu, không flash empty/fallback state, không có skeleton/card khác style với page chuẩn
 - Với bug visual/alignment/overlay, không được chỉ dựa vào type-check hoặc nhìn code. Phải verify bằng browser với DOM metric cụ thể hoặc screenshot: top/left/height delta, `elementFromPoint`, computed `z-index`, overflow, và trạng thái sau click/reload thật.
+- Với create/edit/detail/booking modal, metric pass là modal nằm giữa viewport (`centerDelta` nhỏ, ưu tiên 0 trên desktop), không horizontal overflow, và DOM đang mở không chứa `.drawer`, `.drawer-overlay`, hoặc `.animate-slideInRight`.
 - Với Settings-style menu alignment, metric pass là section active nằm cùng top line với menu card/sidebar (sai số visual nhỏ do border/shadow, thường <= 8px), không phải cùng top với menu item.
 - Với dropdown overlay trong card, metric pass là điểm nằm trong vùng dropdown trả về element thuộc dropdown qua `elementFromPoint`, không bị card bên dưới che.

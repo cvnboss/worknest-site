@@ -7,25 +7,32 @@ This is the root planning index for WorkNest feature prioritization. Detailed pe
 | Feature | Status | Detailed Plan |
 |---|---|---|
 | Department Management | Implemented and stabilized | `docs/plans/department_management_plan.md` |
-| Audit Log | Selected next, pending approval | `docs/plans/audit_log_plan.md` |
+| Audit Log | Implemented and desktop-verified | `docs/plans/audit_log_plan.md` |
+| Task Comments | Recommended next | `docs/plans/task_comments_plan.md` |
 
 ## Current Decision
 
-Selected next feature: Audit Log.
-
-Do not implement Audit Log until the detailed plan is approved.
+Selected next feature: Task Comments.
 
 Reason:
 
-1. Department Management is complete and introduced more admin mutations.
-2. Audit Log gives Admin users traceability before the app gains more workflow-heavy modules.
-3. It is additive, admin-only, and fits the current in-memory data architecture.
-4. It does not require external services, realtime infrastructure, storage migration, or new npm dependencies.
+1. Department Management is complete and Audit Log Phase A is now implemented.
+2. Task Comments is a small, high-value collaboration feature that extends an existing module instead of opening a large new surface.
+3. Announcement comments already provide a local API/data pattern that can be adapted safely.
+4. It does not require realtime infrastructure, file storage, external services, or new npm dependencies.
+5. It gives Playwright E2E tests a useful create/read/delete workflow inside an existing board.
 
-Fallback if Audit Log is deferred:
+Fallback if Task Comments is deferred:
 
-1. Task Comments, because Announcement comments already provide a local pattern.
-2. Responsive Mobile audit, if the next goal is polish rather than new functionality.
+1. Advanced Notification Center, because the header dropdown and notification APIs already exist.
+2. Export Reports CSV, if the next goal is admin/reporting coverage.
+3. Dark Mode, if the next goal is design-system polish.
+
+Not selected now:
+
+1. Responsive Mobile, because the app is currently scoped as a desktop-focused internal system.
+2. Attendance & Timesheet, because it is a larger HR module and should follow one smaller collaboration increment.
+3. Internal Messenger, because realtime infrastructure is outside the current demo architecture.
 
 ## Department Management Recap
 
@@ -84,13 +91,13 @@ Priority is based on:
 | Rank | Feature | Priority | Current Status | Decision |
 |---:|---|---|---|---|
 | 1 | Department Management | Maintain | Implemented and stabilized | Closed; maintain only |
-| 2 | Audit Log | P0 | Not implemented | Selected next feature |
-| 3 | Responsive Mobile | P0 | Partially present | Continue opportunistic fixes; full audit later |
-| 4 | Dark Mode | P1 | Partially hinted, no complete theme system | Follow design-token audit |
-| 5 | Advanced Notification Center | P1 | Dropdown/API baseline exists | Upgrade later, do not rebuild |
-| 6 | Task Comments | P1 | Not implemented for tasks | Good collaboration quick win |
-| 7 | Attendance & Timesheet | P1 | Not implemented | Core HR module |
-| 8 | Export Reports | P1 | Not implemented | Add CSV first, PDF/Excel later |
+| 2 | Audit Log | Maintain | Implemented Phase A and desktop-verified | Closed; Phase B optional later |
+| 3 | Task Comments | P1 | Not implemented for tasks | Selected next feature |
+| 4 | Advanced Notification Center | P1 | Dropdown/API baseline exists | Upgrade later, do not rebuild |
+| 5 | Attendance & Timesheet | P1 | Not implemented | Core HR module |
+| 6 | Export Reports | P1 | Not implemented | Add CSV first, PDF/Excel later |
+| 7 | Dark Mode | P1 | Partially hinted, no complete theme system | Follow design-token audit |
+| 8 | Responsive Mobile | Deferred | Partially present | Do not prioritize until responsive scope is requested |
 | 9 | Employee Profile Upgrade | P2 | Baseline exists | Enhance only |
 | 10 | Unified Calendar Upgrade | P2 | Baseline exists | Enhance month/week/day/filter only |
 | 11 | Organization Chart | P2 | Not implemented | Depends on departments/reporting lines |
@@ -141,8 +148,7 @@ Partially developed:
 
 Not developed as full modules:
 
-1. Audit Log
-2. Task Comments
+1. Task Comments
 3. Attendance & Timesheet
 4. Export Reports
 5. Organization Chart
@@ -162,14 +168,22 @@ Not developed as full modules:
 
 Before implementation:
 
-1. Read `docs/plans/audit_log_plan.md`.
-2. Confirm the Audit Log scope.
-3. Approve implementation.
+1. Create `docs/plans/task_comments_plan.md`.
+2. Audit the existing Task Board and Announcement comment patterns.
+3. Confirm the Task Comments scope before coding.
 
-After approval:
+Recommended Task Comments scope:
 
-1. Add audit types, constants, and helper.
-2. Add `GET /api/audit-logs`.
-3. Instrument Phase A routes.
-4. Add Audit Logs page and nav item.
-5. Run static, API, and browser checks.
+1. Add comments to each task with author, content, timestamp, and optional edit/delete ownership.
+2. Show comment count on task cards without cluttering the Kanban layout.
+3. Add a task detail/comment panel or modal that matches existing drawer/modal styling.
+4. Add authenticated API routes for listing and adding comments, with delete/edit only for author or Admin.
+5. Add seed comments for a few representative tasks so E2E tests have stable initial data.
+6. Add Audit Log instrumentation for task comment create/delete only if it stays low-risk.
+
+Verification before closing:
+
+1. `npm run type-check`
+2. `npm run build`
+3. API smoke checks for task comment create/list/delete permissions.
+4. Desktop browser checks for Tasks board comment count, detail panel alignment, and no dropdown layering regression.
